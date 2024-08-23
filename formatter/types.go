@@ -20,13 +20,13 @@ type InputMedia struct {
 }
 
 type Formatter struct {
-	Message       types.Send
-	Keyboard      InlineKeyboard
-	DeleteMessage types.DelMessage
-	Err           error
-	contenttype   string
-	kindofmedia   []int
-	mediatype     []string
+	Message        types.Send
+	Keyboard       InlineKeyboard
+	DeletedMessage types.DelMessage
+	Err            error
+	contenttype    string
+	kindofmedia    []int
+	mediatype      []string
 }
 
 type btnKind int

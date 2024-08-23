@@ -7,39 +7,46 @@ import (
 	"mime/multipart"
 	"os"
 
+	"github.com/l1qwie/Fmtogram/logs"
 	"github.com/l1qwie/Fmtogram/types"
 )
 
 func (fm *Formatter) AddPhotoFromStorage(path string) {
+	logs.DataWrittenSuccessfully("A Photo From The Storage")
 	fm.Message.Photo = path
 	fm.kindofmedia = []int{fromStorage}
 	fm.mediatype = []string{"photo"}
 }
 
 func (fm *Formatter) AddPhotoFromTG(path string) {
+	logs.DataWrittenSuccessfully("A Photo Telegram ID")
 	fm.Message.Photo = path
 	fm.kindofmedia = []int{fromTelegram}
 	fm.mediatype = []string{"photo"}
 }
 
 func (fm *Formatter) AddPhotoFromInternet(path string) {
+	logs.DataWrittenSuccessfully("A Photo Url From The Internet")
 	fm.Message.Photo = path
 	fm.kindofmedia = []int{fromInternet}
 	fm.mediatype = []string{"photo"}
 }
 func (fm *Formatter) AddVideoFromStorage(path string) {
+	logs.DataWrittenSuccessfully("A Video From The Storage")
 	fm.Message.Video = path
 	fm.kindofmedia = []int{fromStorage}
 	fm.mediatype = []string{"video"}
 }
 
 func (fm *Formatter) AddVideoFromTG(path string) {
+	logs.DataWrittenSuccessfully("A Video Telegram ID")
 	fm.Message.Video = path
 	fm.kindofmedia = []int{fromTelegram}
 	fm.mediatype = []string{"video"}
 }
 
 func (fm *Formatter) AddVideoFromInternet(path string) {
+	logs.DataWrittenSuccessfully("A Video Url From The Internet")
 	fm.Message.Video = path
 	fm.kindofmedia = []int{fromInternet}
 	fm.mediatype = []string{"video"}
