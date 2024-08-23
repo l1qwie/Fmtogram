@@ -1,7 +1,9 @@
 package formatter
 
-func (fm *Formatter) SetIkbdDim(dim []int) {
+import "github.com/l1qwie/Fmtogram/logs"
 
+func (fm *Formatter) SetIkbdDim(dim []int) {
+	logs.DataWrittenSuccessfully("The Structure Of Inline Keyboard")
 	fm.Keyboard.Keyboard = make([][]btn, len(dim))
 	for i := 0; i < len(dim); i++ {
 		fm.Keyboard.Keyboard[i] = make([]btn, dim[i])
@@ -16,6 +18,7 @@ func (fm *Formatter) doRutine() {
 }
 
 func (fm *Formatter) WriteInlineButtonCmd(label, cmd string) {
+	logs.DataWrittenSuccessfully("A CMD-Button Of Inline Keyboard")
 	fm.doRutine()
 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Label = label
 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].what = bCmd
@@ -26,11 +29,11 @@ func (fm *Formatter) WriteInlineButtonCmd(label, cmd string) {
 }
 
 func (fm *Formatter) WriteInlineButtonUrl(label, url string) {
+	logs.DataWrittenSuccessfully("A URL-Button Of Inline Keyboard")
 	fm.doRutine()
 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Label = label
 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].what = bUrl
 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Url = url
 
 	fm.Keyboard.x = fm.Keyboard.x + 1
-
 }

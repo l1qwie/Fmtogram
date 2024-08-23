@@ -8,33 +8,49 @@ import (
 
 	"github.com/l1qwie/Fmtogram/errors"
 	"github.com/l1qwie/Fmtogram/executer"
+	"github.com/l1qwie/Fmtogram/logs"
 	"github.com/l1qwie/Fmtogram/types"
 )
 
-func (fm *Formatter) WriteString(lineoftext string) {
-	fm.Message.Text = lineoftext
+// Save a text of the message for sending
+func (fm *Formatter) WriteString(text string) {
+	logs.DataWrittenSuccessfully("Text Of The Message")
+	fm.Message.Text = text
 }
+
+// Save a Chat name of a chat for sending
 func (fm *Formatter) WriteChatName(chatname string) {
+	logs.DataWrittenSuccessfully("Chatname")
 	fm.Message.ChatID = fmt.Sprint("@", chatname)
 }
 
+// Save a Chat ID of a chat for sending
 func (fm *Formatter) WriteChatId(chatID int) {
+	logs.DataWrittenSuccessfully("ChatID")
 	fm.Message.ChatID = chatID
 }
 
+// Save a Parse Mode of the message for sending
 func (fm *Formatter) WriteParseMode(mode string) {
+	logs.DataWrittenSuccessfully("Parse Mode")
 	fm.Message.ParseMode = mode
 }
 
+// Save a Deleted Message ID for future deleting
 func (fm *Formatter) WriteDeleteMesId(mesId int) {
-	fm.DeleteMessage.MessageId = mesId
+	logs.DataWrittenSuccessfully("Deleted Message ID")
+	fm.DeletedMessage.MessageId = mesId
 }
 
+// Save an Edited Message ID for future editing
 func (fm *Formatter) WriteEditMesId(mesId int) {
+	logs.DataWrittenSuccessfully("Edited Message ID")
 	fm.Message.MessageId = mesId
 }
 
+// Save an Error to handle it soon
 func (fm *Formatter) Error(err error) {
+	logs.DataWrittenSuccessfully("Error")
 	fm.Err = err
 }
 
@@ -51,12 +67,12 @@ func (fm *Formatter) CheckDelete() (err error) {
 		jsonMessage []byte
 		finalBuffer *bytes.Buffer
 	)
-	if fm.DeleteMessage.MessageId != 0 {
+	if fm.DeletedMessage.MessageId != 0 {
 		function = "deleteMessage"
 		if chatid, ok := fm.Message.ChatID.(int); ok {
-			fm.DeleteMessage.ChatId = chatid
+			fm.DeletedMessage.ChatId = chatid
 		}
-		jsonMessage, err = json.Marshal(fm.DeleteMessage)
+		jsonMessage, err = json.Marshal(fm.DeletedMessage)
 		if err == nil {
 			fm.contenttype = "application/json"
 			finalBuffer = bytes.NewBuffer(jsonMessage)
@@ -156,7 +172,7 @@ func (fm *Formatter) Make() (*types.Returned, error) {
 		}
 	}
 	if err == nil {
-		log.Print("THE MESSAGE ID DELETE OR EDIT AND MARSHAL STATUS: ", fm.DeleteMessage.MessageId, fm.Message.MessageId, mshstat)
+		log.Print("THE MESSAGE ID DELETE OR EDIT AND MARSHAL STATUS: ", fm.DeletedMessage.MessageId, fm.Message.MessageId, mshstat)
 		res = executer.Send(buf, f, fm.contenttype, mshstat)
 	}
 
@@ -174,6 +190,32 @@ func (fm *Formatter) SendToChannel() error {
 	}
 	return err
 }
+
+func (fm *Formatter) DeleteMessage() {
+	finalBuffer := new(bytes.Buffer)
+	function := "deleteMessage"
+	if fm.DeletedMessage.MessageId != nil {
+		if fm.DeletedMessage.ChatId != nil {
+			jsonMessage, err := json.Marshal(fm.DeletedMessage)
+			if err == nil {
+				fm.contenttype = "application/json"
+				finalBuffer = bytes.NewBuffer(jsonMessage)
+			}
+			if err == nil {
+				_ = executer.Send(finalBuffer, function, fm.contenttype, false)
+			}
+		} else {
+			errors.ChatIDIsNil()
+		}
+	} else {
+		errors.MessageIDIsNil()
+	}
+}
+
+// func (fm *Formatter) EditMessage() {
+// 	finalBuffer := new(bytes.Buffer)
+// 	function := "editMessageText"
+// }
 
 func (fm *Formatter) Send() (mes *types.Returned, err error) {
 	var (

@@ -9,8 +9,8 @@ import (
 func ReturnText(Telegram *types.Telegram) (text string) {
 	if Telegram.Result[0].Message.Text != "" {
 		text = Telegram.Result[0].Message.Text
-	} else if Telegram.Result[0].Query.Data != "" {
-		text = Telegram.Result[0].Query.Data
+	} else if Telegram.Result[0].CallbackQuery.Data != "" {
+		text = Telegram.Result[0].CallbackQuery.Data
 	}
 	return text
 }
@@ -18,8 +18,8 @@ func ReturnText(Telegram *types.Telegram) (text string) {
 func ReturnChatId(Telegram *types.Telegram) (chatID int) {
 	if Telegram.Result[0].Message.TypeFrom.UserID != 0 {
 		chatID = Telegram.Result[0].Message.TypeFrom.UserID
-	} else if Telegram.Result[0].Query.TypeFrom.UserID != 0 {
-		chatID = Telegram.Result[0].Query.TypeFrom.UserID
+	} else if Telegram.Result[0].CallbackQuery.TypeFrom.UserID != 0 {
+		chatID = Telegram.Result[0].CallbackQuery.TypeFrom.UserID
 	}
 	return chatID
 }
@@ -27,8 +27,8 @@ func ReturnChatId(Telegram *types.Telegram) (chatID int) {
 func ReturnName(Telegram *types.Telegram) (name string) {
 	if Telegram.Result[0].Message.TypeFrom.Name != "" {
 		name = Telegram.Result[0].Message.TypeFrom.Name
-	} else if Telegram.Result[0].Query.TypeFrom.Name != "" {
-		name = Telegram.Result[0].Query.TypeFrom.Name
+	} else if Telegram.Result[0].CallbackQuery.TypeFrom.Name != "" {
+		name = Telegram.Result[0].CallbackQuery.TypeFrom.Name
 	}
 	return name
 }
@@ -36,8 +36,8 @@ func ReturnName(Telegram *types.Telegram) (name string) {
 func ReturnLastName(Telegram *types.Telegram) (lastname string) {
 	if Telegram.Result[0].Message.TypeFrom.LastName != "" {
 		lastname = Telegram.Result[0].Message.TypeFrom.LastName
-	} else if Telegram.Result[0].Query.TypeFrom.LastName != "" {
-		lastname = Telegram.Result[0].Query.TypeFrom.LastName
+	} else if Telegram.Result[0].CallbackQuery.TypeFrom.LastName != "" {
+		lastname = Telegram.Result[0].CallbackQuery.TypeFrom.LastName
 	}
 	return lastname
 }
@@ -45,8 +45,8 @@ func ReturnLastName(Telegram *types.Telegram) (lastname string) {
 func ReturnUsername(Telegram *types.Telegram) (username string) {
 	if Telegram.Result[0].Message.TypeFrom.Username != "" {
 		username = Telegram.Result[0].Message.TypeFrom.Username
-	} else if Telegram.Result[0].Query.TypeFrom.Username != "" {
-		username = Telegram.Result[0].Query.TypeFrom.Username
+	} else if Telegram.Result[0].CallbackQuery.TypeFrom.Username != "" {
+		username = Telegram.Result[0].CallbackQuery.TypeFrom.Username
 	}
 	return username
 }
@@ -54,8 +54,8 @@ func ReturnUsername(Telegram *types.Telegram) (username string) {
 func ReturnPhone(tr *types.Telegram) (phone string) {
 	if tr.Result[0].Message.TypeFrom.Phone != "" {
 		phone = tr.Result[0].Message.TypeFrom.Phone
-	} else if tr.Result[0].Query.TypeFrom.Phone != "" {
-		phone = tr.Result[0].Query.TypeFrom.Phone
+	} else if tr.Result[0].CallbackQuery.TypeFrom.Phone != "" {
+		phone = tr.Result[0].CallbackQuery.TypeFrom.Phone
 	}
 	return phone
 }
@@ -63,8 +63,8 @@ func ReturnPhone(tr *types.Telegram) (phone string) {
 func ReturnLanguage(Telegram *types.Telegram) (language string) {
 	if Telegram.Result[0].Message.TypeFrom.Language != "" {
 		language = Telegram.Result[0].Message.TypeFrom.Language
-	} else if Telegram.Result[0].Query.TypeFrom.Language != "" {
-		language = Telegram.Result[0].Query.TypeFrom.Language
+	} else if Telegram.Result[0].CallbackQuery.TypeFrom.Language != "" {
+		language = Telegram.Result[0].CallbackQuery.TypeFrom.Language
 	}
 	return language
 }
@@ -72,7 +72,7 @@ func ReturnLanguage(Telegram *types.Telegram) (language string) {
 func ReturnBotStatus(Telegram *types.Telegram) (botstatus bool) {
 
 	m_isbot := Telegram.Result[0].Message.TypeFrom.IsBot
-	cl_isbot := Telegram.Result[0].Query.TypeFrom.IsBot
+	cl_isbot := Telegram.Result[0].CallbackQuery.TypeFrom.IsBot
 
 	if !m_isbot && !cl_isbot {
 		botstatus = false
@@ -272,8 +272,8 @@ func ReturnMediaReq(req *types.Telegram) ([]types.Media, error) {
 
 func ReturnTypeOfChat(req *types.Telegram) string {
 	var res string
-	if req.Result[0].Query.Message.Chat.Type != "" {
-		res = req.Result[0].Query.Message.Chat.Type
+	if req.Result[0].CallbackQuery.Message.Chat.Type != "" {
+		res = req.Result[0].CallbackQuery.Message.Chat.Type
 	} else if req.Result[0].Message.Chat.Type != "" {
 		res = req.Result[0].Message.Chat.Type
 	}

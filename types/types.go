@@ -1,14 +1,10 @@
 package types
 
-import (
-	"database/sql"
-
-	_ "github.com/lib/pq"
-)
-
 var (
 	BotID string
-	Db    *sql.DB
+	DEBUG bool
+	INFO  bool
+	// StartFunc func(*Telegram, *Returned) *formatter.Formatter
 )
 
 const (
@@ -23,13 +19,13 @@ type BadResponse struct {
 	Description string `json:"description"`
 }
 
+type StorageOfJson struct {
+	ID int `json:"update_id"`
+}
+
 type JustForUpdate struct {
 	Ok     bool            `json:"ok"`
 	Result []StorageOfJson `json:"result"`
-}
-
-type StorageOfJson struct {
-	ID int `json:"update_id"`
 }
 
 type Media struct {
@@ -65,15 +61,7 @@ type Video struct {
 	FileId string `json:"file_id"`
 }
 
-type InfMessage struct {
-	TypeFrom User    `json:"from"`
-	Chat     Chat    `json:"chat"`
-	Text     string  `json:"text"`
-	Photo    []Photo `json:"photo"`
-	Video    []Video `json:"video"`
-}
-
-type Message struct {
+type ReturnedMessage struct {
 	MessageId int     `json:"message_id"`
 	Chat      Chat    `json:"chat"`
 	Photo     []Photo `json:"photo"`
@@ -86,16 +74,9 @@ type Callback struct {
 	Message  Message `json:"message"`
 }
 
-type Update struct {
-	UpdateID  int        `json:"update_id"`
-	MessageId int        `json:"message_id"`
-	Message   InfMessage `json:"message"`
-	Query     Callback   `json:"callback_query"`
-}
-
 type Returned struct {
-	Ok     bool    `json:"ok"`
-	Result Message `json:"result"`
+	Ok     bool            `json:"ok"`
+	Result ReturnedMessage `json:"result"`
 }
 
 type TelegramError struct {
@@ -122,6 +103,42 @@ type Send struct {
 }
 
 type DelMessage struct {
-	ChatId    int `json:"chat_id"`
-	MessageId int `json:"message_id"`
+	ChatId    interface{} `json:"chat_id"`
+	MessageId interface{} `json:"message_id"`
+}
+
+type Message struct {
+	MessageID       int     `json:"message_id"`
+	MessageThreadID int     `json:"message_thread_id"`
+	From            User    `json:"from"`
+	Chat            Chat    `json:"chat"`
+	Text            string  `json:"text"`
+	Photo           []Photo `json:"photo"`
+	Video           []Video `json:"video"`
+}
+
+type Update struct {
+	UpdateID               int                         `json:"update_id"`
+	Message                Message                     `json:"message"`
+	EditedMessage          Message                     `json:"edited_message"`
+	ChanPost               Message                     `json:"channel_post"`
+	EditedChanPost         Message                     `json:"edited_channel_post"`
+	BusinessConn           BusinessConnection          `json:"business_connection"`
+	BusinessMessage        Message                     `json:"business_message"`
+	EditedBusinessMessage  Message                     `json:"edited_business_message"`
+	DeletedBusinessMessage BusinessMessageDeleted      `json:"deleted_business_messages"`
+	MessageReaction        MessageReactionUpdated      `json:"message_reaction"`
+	MessageReactionCount   MessageReactionCountUpdated `json:"message_reaction_count"`
+	InlineQuery            InlineQuery                 `json:"inline_query"`
+	ChosenInlineResult     ChosenInlineResult          `json:"chosen_inline_result"`
+	CallbackQuery          CallbackQuery               `json:"callback_query"`
+	ShippingQuery          ShippingQuery               `json:"shipping_query"`
+	PreCheckoutQuery       PreCheckoutQuery            `json:"pre_checkout_query"`
+	Poll                   Poll                        `json:"poll"`
+	PollAnswer             PollAnswer                  `json:"poll_answer"`
+	MyChatMember           ChatMemberUpdated           `json:"my_chat_member"`
+	ChatMember             ChatMemberUpdated           `json:"chat_member"`
+	ChatJoinRequest        ChatJoinRequest             `json:"chat_join_request"`
+	ChatBoost              ChatBoostUpdated            `json:"chat_boost"`
+	RemovedChatBoost       ChatBoostRemoved            `json:"removed_chat_boost"`
 }

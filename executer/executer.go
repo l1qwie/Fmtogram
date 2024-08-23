@@ -25,16 +25,12 @@ type RegTable struct {
 	Reg []Entry
 }
 
-func GetpostRequest(url string, Buffer *bytes.Buffer, contenttype string) (body []byte, err error) {
-	var (
-		request  *http.Request
-		response *http.Response
-		client   *http.Client
-	)
-	request, err = http.NewRequest("POST", url, Buffer)
+func sendRequest(buffer *bytes.Buffer, url, contenttype string) ([]byte, error) {
+	response := new(http.Response)
+	request, err := http.NewRequest("POST", url, buffer)
 	if err == nil {
 		request.Header.Set("Content-Type", contenttype)
-		client = &http.Client{}
+		client := &http.Client{}
 		response, err = client.Do(request)
 		if err == nil {
 			defer response.Body.Close()
@@ -46,8 +42,8 @@ func GetpostRequest(url string, Buffer *bytes.Buffer, contenttype string) (body 
 	return io.ReadAll(response.Body)
 }
 
-func heandlerMessage(response []byte, mes *types.Returned) (err error) {
-	err = json.Unmarshal(response, &mes)
+func heandlerMessage(response []byte, mes *types.Returned) error {
+	err := json.Unmarshal(response, &mes)
 	if err != nil {
 		err = nil
 		tr := new(types.Telegram)
@@ -57,21 +53,16 @@ func heandlerMessage(response []byte, mes *types.Returned) (err error) {
 	return err
 }
 
-func Send(buf *bytes.Buffer, function, contenttype string, unmarshal bool) (mes *types.Returned) {
-	var (
-		err  error
-		url  string
-		body []byte
-	)
-	url = fmt.Sprintf("%sbot%s/%s", types.HttpsRequest, types.BotID, function)
-	body, err = GetpostRequest(url, buf, contenttype)
+func Send(buf *bytes.Buffer, function, contenttype string, unmarshal bool) *types.Returned {
+	mes := new(types.Returned)
+	url := fmt.Sprintf("%sbot%s/%s", types.HttpsRequest, types.BotID, function)
+	body, err := sendRequest(buf, url, contenttype)
 	if err == nil && unmarshal {
-		mes = new(types.Returned)
 		err = heandlerMessage(body, mes)
 	} else if !unmarshal {
 		mes = &types.Returned{
 			Ok: false,
-			Result: types.Message{
+			Result: types.ReturnedMessage{
 				MessageId: 0,
 				Chat: types.Chat{
 					Id: 0,
@@ -80,29 +71,12 @@ func Send(buf *bytes.Buffer, function, contenttype string, unmarshal bool) (mes 
 		}
 	}
 	if err != nil {
-		log.Printf("Ошикба при попытке отправить request к Telegram Send(): %s", err)
+		errors.RequestError(err)
 	}
 	return mes
 }
 
-func Updates(offset *int, Telegram *types.Telegram) (err error) {
-	var (
-		response *http.Response
-		body     []byte
-	)
-	url := fmt.Sprintf(types.HttpsRequest+"bot%s/getUpdates?limit=1&offset=%d", types.BotID, *offset)
-	response, err = http.Get(url)
-	if err == nil {
-		defer response.Body.Close()
-		body, err = io.ReadAll(response.Body)
-	}
-	if err == nil {
-		err = handlerTelegram(body, Telegram)
-	}
-	return err
-}
-
-func firstMisstake(response []byte) (string, bool) {
+func firstMistake(response []byte) (string, bool) {
 	var (
 		monitor bool
 		mes     string
@@ -122,7 +96,7 @@ func firstMisstake(response []byte) (string, bool) {
 	return mes, monitor
 }
 
-func secondMisstake(response []byte, tr *types.Telegram) string {
+func secondMistake(response []byte, tr *types.Telegram) string {
 	var mes string
 	err := json.Unmarshal(response, &tr)
 	if err == nil {
@@ -143,12 +117,26 @@ func handlerTelegram(response []byte, Telegram *types.Telegram) error {
 		descrip string
 		err     error
 	)
-	descrip, monitor = firstMisstake(response)
+	descrip, monitor = firstMistake(response)
 	if !monitor {
-		descrip = secondMisstake(response, Telegram)
+		descrip = secondMistake(response, Telegram)
 	}
 	if descrip != "" {
 		err = fmt.Errorf(descrip)
+	}
+	return err
+}
+
+func Updates(offset *int, Telegram *types.Telegram) error {
+	var body []byte
+	url := fmt.Sprintf(types.HttpsRequest+"bot%s/getUpdates?limit=1&offset=%d", types.BotID, *offset)
+	response, err := http.Get(url)
+	if err == nil {
+		defer response.Body.Close()
+		body, err = io.ReadAll(response.Body)
+	}
+	if err == nil {
+		err = handlerTelegram(body, Telegram)
 	}
 	return err
 }
@@ -175,13 +163,12 @@ func (reg *RegTable) NewIndex() (newIndex int) {
 	return newIndex
 }
 
-func handlerOffsetResponse(response []byte, offset *int) (err error) {
-	var Telegram types.JustForUpdate
-
-	err = json.Unmarshal(response, &Telegram)
+func handlerOffsetResponse(response []byte, offset *int) error {
+	telegram := new(types.JustForUpdate)
+	err := json.Unmarshal(response, telegram)
 	if err == nil {
-		if len(Telegram.Result) > 0 {
-			for _, storage := range Telegram.Result {
+		if len(telegram.Result) > 0 {
+			for _, storage := range telegram.Result {
 				*offset = storage.ID
 			}
 		} else {
@@ -191,14 +178,11 @@ func handlerOffsetResponse(response []byte, offset *int) (err error) {
 	return err
 }
 
-func RequestOffset(TelebotToken string, offset *int) (err error) {
-	var (
-		response *http.Response
-		body     []byte
-	)
+func RequestOffset(telebotToken string, offset *int) error {
+	var body []byte
 
-	Url := fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?limit=1", url.PathEscape(TelebotToken))
-	response, err = http.Get(Url)
+	Url := fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?limit=1", url.PathEscape(telebotToken))
+	response, err := http.Get(Url)
 	if err == nil {
 		defer response.Body.Close()
 		body, err = io.ReadAll(response.Body)
