@@ -108,13 +108,15 @@ type DelMessage struct {
 }
 
 type Message struct {
-	MessageID       int     `json:"message_id"`
-	MessageThreadID int     `json:"message_thread_id"`
-	From            User    `json:"from"`
-	Chat            Chat    `json:"chat"`
-	Text            string  `json:"text"`
-	Photo           []Photo `json:"photo"`
-	Video           []Video `json:"video"`
+	MessageID       int  `json:"message_id"`
+	MessageThreadID int  `json:"message_thread_id"`
+	From            User `json:"from"`
+	SenderChat      Chat `json:""`
+
+	Chat  Chat    `json:"chat"`
+	Text  string  `json:"text"`
+	Photo []Photo `json:"photo"`
+	Video []Video `json:"video"`
 }
 
 type Update struct {
