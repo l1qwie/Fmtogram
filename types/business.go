@@ -1,4 +1,4 @@
-package typeS
+package types
 
 type BusinessConnection struct {
 	ID         string `json:"id"`

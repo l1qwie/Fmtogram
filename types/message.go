@@ -1,4 +1,4 @@
-package typeS
+package types
 
 type InaccessibleMessage struct {
 	Chat      *Chat `json:"chat"`

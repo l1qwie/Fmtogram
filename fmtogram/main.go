@@ -11,14 +11,14 @@ import (
 	"github.com/l1qwie/Fmtogram/types"
 )
 
-var StartFunc func(*types.Telegram, *types.Returned) *formatter.Formatter
+var StartFunc func(*types.Telegram, *types.Telegram) *formatter.Formatter
 
 func firstStep(offset *int) {
 	logs.GetOffset()
 
-	err := executer.RequestOffset(types.BotID, offset)
+	err := executer.GetOffset(offset)
 	for err != nil {
-		err = executer.RequestOffset(types.BotID, offset)
+		err = executer.GetOffset(offset)
 		time.Sleep(time.Second / 10)
 	}
 
@@ -45,11 +45,11 @@ func pullResponse(output chan *formatter.Formatter, reg *executer.RegTable) {
 	firstStep(&offset)
 	for {
 		tg := new(types.Telegram)
-		err := executer.Updates(&offset, tg)
+		err := executer.GetUpdates(tg, &offset)
 		if len(tg.Result) != 0 && err == nil {
 			logs.FoundSomeIformation()
 
-			chatID := helper.ReturnChatId(tg)
+			chatID := helper.GetUserID(tg)
 			index := reg.Seeker(chatID)
 
 			queue(reg, tg, chatID, index)
@@ -63,32 +63,20 @@ func pullResponse(output chan *formatter.Formatter, reg *executer.RegTable) {
 	}
 }
 
-func worker(input chan *types.Telegram, returned chan *types.Returned, output chan *formatter.Formatter) {
-	userstruct := new(types.Telegram)
-	mes := new(types.Returned)
+func worker(input chan *types.Telegram, returned chan *types.Telegram, output chan *formatter.Formatter) {
+	tg := new(types.Telegram)
+	tgReturned := new(types.Telegram)
 
 	for len(input) > 0 {
-		userstruct = <-input
+		tg = <-input
 		if len(returned) > 0 {
 			logs.ReturnedIsntEmply()
-			mes = <-returned
+			tgReturned = <-returned
 		} else {
 			logs.ReturnedIsEmply()
-			mes = &types.Returned{
-				Ok: false,
-				Result: types.ReturnedMessage{
-					MessageId: 0,
-					Chat: types.Chat{
-						Id: 0,
-					},
-					Photo: []types.Photo{{
-						FileId: "",
-					}},
-				},
-			}
 		}
 		logs.CallDeveloperFunc()
-		fm := StartFunc(userstruct, mes)
+		fm := StartFunc(tg, tgReturned)
 		if err := fm.Complete(); err == nil {
 			output <- fm
 		}
@@ -105,8 +93,8 @@ func pushRequest(requests <-chan *formatter.Formatter, reg *executer.RegTable) {
 		}
 		if mes.Ok {
 			logs.ReturnedIsntEmply()
-			index := reg.Seeker(mes.Result.Chat.Id)
-			reg.Reg[index].Chb = make(chan *types.Returned, 1)
+			index := reg.Seeker(mes.Result[0].Message.From.ID)
+			reg.Reg[index].Chb = make(chan *types.Telegram, 1)
 			reg.Reg[index].Chb <- mes
 		}
 	}

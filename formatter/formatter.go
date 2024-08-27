@@ -15,37 +15,40 @@ import (
 // Save a text of the message for sending
 func (fm *Formatter) WriteString(text string) {
 	logs.DataWrittenSuccessfully("Text Of The Message")
-	fm.Message.Text = text
+	fm.message.text = text
 }
 
 // Save a Chat name of a chat for sending
 func (fm *Formatter) WriteChatName(chatname string) {
 	logs.DataWrittenSuccessfully("Chatname")
-	fm.Message.ChatID = fmt.Sprint("@", chatname)
+	fm.chat.chatID = fmt.Sprint("@", chatname)
 }
 
 // Save a Chat ID of a chat for sending
 func (fm *Formatter) WriteChatId(chatID int) {
 	logs.DataWrittenSuccessfully("ChatID")
-	fm.Message.ChatID = chatID
+	fm.chat.chatID = chatID
 }
 
 // Save a Parse Mode of the message for sending
 func (fm *Formatter) WriteParseMode(mode string) {
 	logs.DataWrittenSuccessfully("Parse Mode")
-	fm.Message.ParseMode = mode
+	fm.message.parseMode = mode
 }
 
 // Save a Deleted Message ID for future deleting
-func (fm *Formatter) WriteDeleteMesId(mesId int) {
+func (fm *Formatter) WriteDeleteMesId(mesID int) {
 	logs.DataWrittenSuccessfully("Deleted Message ID")
-	fm.DeletedMessage.MessageId = mesId
+	fm.message.messageID = mesID
+	fm.message.action = DELETE
+
 }
 
 // Save an Edited Message ID for future editing
 func (fm *Formatter) WriteEditMesId(mesId int) {
 	logs.DataWrittenSuccessfully("Edited Message ID")
-	fm.Message.MessageId = mesId
+	fm.message.messageID = mesId
+	fm.message.action = EDIT
 }
 
 // Save an Error to handle it soon
@@ -120,7 +123,7 @@ func (fm *Formatter) mediaGroup() error {
 	return err
 }
 
-func (fm *Formatter) media() (*bytes.Buffer, string, error) {
+func (fm *Formatter) mediaPreparing() (*bytes.Buffer, string, error) {
 	var (
 		buf *bytes.Buffer
 		err error
@@ -140,7 +143,7 @@ func (fm *Formatter) media() (*bytes.Buffer, string, error) {
 	return buf, f, err
 }
 
-func (fm *Formatter) Make() (*types.Returned, error) {
+func (fm *Formatter) Make() (*types.Telegram, error) {
 	var (
 		buf     *bytes.Buffer
 		f       string

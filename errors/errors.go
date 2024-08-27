@@ -9,8 +9,6 @@ import (
 	"github.com/l1qwie/Fmtogram/logs"
 )
 
-var head string = "\n\nAnswer from byogram: "
-
 func AssertTest(compared, comparedfunc, comparator, comparatorfunc string) (err error) {
 	body := "[TEST LOG] Error: The data doesn't match. The original passed value in %s (%s) is different from the final %s (%s)"
 	err = fmt.Errorf(fmt.Sprintf(body, comparedfunc, compared, comparatorfunc, comparator))
@@ -23,7 +21,7 @@ func JustError(message string) (err error) {
 }
 
 func UpdatesMisstakes(part string) (err error) {
-	body := fmt.Sprintf(head, part)
+	body := fmt.Sprintf("[WARNING] Couldn't get any updates: %s", part)
 	err = fmt.Errorf(body)
 
 	return err

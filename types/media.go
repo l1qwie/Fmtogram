@@ -1,4 +1,4 @@
-package typeS
+package types
 
 type Dice struct {
 	Emoji string `json:"emoji"`

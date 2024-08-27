@@ -1,4 +1,4 @@
-package typeS
+package types
 
 type SwitchInlineQueryChosenChat struct {
 	Query             string `json:"query,omitempty"`

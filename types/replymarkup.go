@@ -1,4 +1,4 @@
-package typeS
+package types
 
 type KeyboardButtonRequestUsers struct {
 	RequestID       int  `json:"request_id"`

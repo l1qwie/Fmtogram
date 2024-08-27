@@ -1,4 +1,17 @@
-package typeS
+package types
+
+var (
+	BotID string
+	DEBUG bool
+	INFO  bool
+	// StartFunc func(*Telegram, *Returned) *formatter.Formatter
+)
+
+const (
+	Markdown    string = "Markdown"
+	HTML        string = "HTML"
+	TelegramAPI string = "https://api.telegram.org/"
+)
 
 type ForumTopicClosed struct {
 	// Currently holds no information
@@ -421,4 +434,27 @@ type Update struct {
 	ChatJoinRequest        *ChatJoinRequest             `json:"chat_join_request"`
 	ChatBoost              *ChatBoostUpdated            `json:"chat_boost"`
 	RemovedChatBoost       *ChatBoostRemoved            `json:"removed_chat_boost"`
+}
+
+type TelegramError struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type Telegram struct {
+	Ok     bool           `json:"ok"`
+	Result []*Update      `json:"result,omitempty"`
+	Error  *TelegramError `json:"error,omitempty"`
+}
+
+type GetMe struct {
+	Ok     bool           `json:"ok"`
+	Result *User          `json:"result,omitempty"`
+	Error  *TelegramError `json:"error,omitempty"`
+}
+
+type BadResponse struct {
+	Ok          bool   `json:"ok"`
+	ErrorCode   int    `json:"error_code"`
+	Description string `json:"description"`
 }

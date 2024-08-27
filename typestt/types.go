@@ -1,4 +1,4 @@
-package types
+package typestt
 
 var (
 	BotID string
@@ -86,7 +86,7 @@ type TelegramError struct {
 
 type Telegram struct {
 	Ok     bool           `json:"ok"`
-	Result []Update       `json:"result"`
+	Result []interface{}  `json:"result"`
 	Error  *TelegramError `json:"error,omitempty"`
 	AppErr *chan error
 }
@@ -117,30 +117,4 @@ type Message struct {
 	Text  string  `json:"text"`
 	Photo []Photo `json:"photo"`
 	Video []Video `json:"video"`
-}
-
-type Update struct {
-	UpdateID               int                         `json:"update_id"`
-	Message                Message                     `json:"message"`
-	EditedMessage          Message                     `json:"edited_message"`
-	ChanPost               Message                     `json:"channel_post"`
-	EditedChanPost         Message                     `json:"edited_channel_post"`
-	BusinessConn           BusinessConnection          `json:"business_connection"`
-	BusinessMessage        Message                     `json:"business_message"`
-	EditedBusinessMessage  Message                     `json:"edited_business_message"`
-	DeletedBusinessMessage BusinessMessageDeleted      `json:"deleted_business_messages"`
-	MessageReaction        MessageReactionUpdated      `json:"message_reaction"`
-	MessageReactionCount   MessageReactionCountUpdated `json:"message_reaction_count"`
-	InlineQuery            InlineQuery                 `json:"inline_query"`
-	ChosenInlineResult     ChosenInlineResult          `json:"chosen_inline_result"`
-	CallbackQuery          CallbackQuery               `json:"callback_query"`
-	ShippingQuery          ShippingQuery               `json:"shipping_query"`
-	PreCheckoutQuery       PreCheckoutQuery            `json:"pre_checkout_query"`
-	Poll                   Poll                        `json:"poll"`
-	PollAnswer             PollAnswer                  `json:"poll_answer"`
-	MyChatMember           ChatMemberUpdated           `json:"my_chat_member"`
-	ChatMember             ChatMemberUpdated           `json:"chat_member"`
-	ChatJoinRequest        ChatJoinRequest             `json:"chat_join_request"`
-	ChatBoost              ChatBoostUpdated            `json:"chat_boost"`
-	RemovedChatBoost       ChatBoostRemoved            `json:"removed_chat_boost"`
 }

@@ -1,4 +1,4 @@
-package typeS
+package types
 
 type ForumTopic struct {
 	MessageThreadID   int    `json:"message_thread_id"`
