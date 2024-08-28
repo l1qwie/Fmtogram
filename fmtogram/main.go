@@ -64,23 +64,23 @@ func pullResponse(output chan *formatter.Formatter, reg *executer.RegTable) {
 }
 
 func worker(input chan *types.Telegram, returned chan *types.Telegram, output chan *formatter.Formatter) {
-	tg := new(types.Telegram)
-	tgReturned := new(types.Telegram)
+	// // tg := new(types.Telegram)
+	// // tgReturned := new(types.Telegram)
 
-	for len(input) > 0 {
-		tg = <-input
-		if len(returned) > 0 {
-			logs.ReturnedIsntEmply()
-			tgReturned = <-returned
-		} else {
-			logs.ReturnedIsEmply()
-		}
-		logs.CallDeveloperFunc()
-		fm := StartFunc(tg, tgReturned)
-		if err := fm.Complete(); err == nil {
-			output <- fm
-		}
-	}
+	// for len(input) > 0 {
+	// 	tg = <-input
+	// 	if len(returned) > 0 {
+	// 		logs.ReturnedIsntEmply()
+	// 		tgReturned = <-returned
+	// 	} else {
+	// 		logs.ReturnedIsEmply()
+	// 	}
+	// 	logs.CallDeveloperFunc()
+	// 	// fm := StartFunc(tg, tgReturned)
+	// 	// if err := fm.Complete(); err == nil {
+	// 	// 	output <- fm
+	// 	// }
+	// }
 }
 
 func pushRequest(requests <-chan *formatter.Formatter, reg *executer.RegTable) {

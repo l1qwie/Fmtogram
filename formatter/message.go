@@ -1,39 +1,37 @@
 package formatter
 
-import "github.com/l1qwie/Fmtogram/logs"
+// func (fm *Formatter) SetIkbdDim(dim []int) {
+// 	logs.DataWrittenSuccessfully("The Structure Of Inline Keyboard")
+// 	fm.Keyboard.Keyboard = make([][]btn, len(dim))
+// 	for i := 0; i < len(dim); i++ {
+// 		fm.Keyboard.Keyboard[i] = make([]btn, dim[i])
+// 	}
+// }
 
-func (fm *Formatter) SetIkbdDim(dim []int) {
-	logs.DataWrittenSuccessfully("The Structure Of Inline Keyboard")
-	fm.Keyboard.Keyboard = make([][]btn, len(dim))
-	for i := 0; i < len(dim); i++ {
-		fm.Keyboard.Keyboard[i] = make([]btn, dim[i])
-	}
-}
+// func (fm *Formatter) doRutine() {
+// 	if fm.Keyboard.x == len(fm.Keyboard.Keyboard[fm.Keyboard.y]) {
+// 		fm.Keyboard.x = 0
+// 		fm.Keyboard.y = fm.Keyboard.y + 1
+// 	}
+// }
 
-func (fm *Formatter) doRutine() {
-	if fm.Keyboard.x == len(fm.Keyboard.Keyboard[fm.Keyboard.y]) {
-		fm.Keyboard.x = 0
-		fm.Keyboard.y = fm.Keyboard.y + 1
-	}
-}
+// func (fm *Formatter) WriteInlineButtonCmd(label, cmd string) {
+// 	logs.DataWrittenSuccessfully("A CMD-Button Of Inline Keyboard")
+// 	fm.doRutine()
+// 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Label = label
+// 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].what = bCmd
+// 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Cmd = cmd
 
-func (fm *Formatter) WriteInlineButtonCmd(label, cmd string) {
-	logs.DataWrittenSuccessfully("A CMD-Button Of Inline Keyboard")
-	fm.doRutine()
-	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Label = label
-	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].what = bCmd
-	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Cmd = cmd
+// 	fm.Keyboard.x = fm.Keyboard.x + 1
 
-	fm.Keyboard.x = fm.Keyboard.x + 1
+// }
 
-}
+// func (fm *Formatter) WriteInlineButtonUrl(label, url string) {
+// 	logs.DataWrittenSuccessfully("A URL-Button Of Inline Keyboard")
+// 	fm.doRutine()
+// 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Label = label
+// 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].what = bUrl
+// 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Url = url
 
-func (fm *Formatter) WriteInlineButtonUrl(label, url string) {
-	logs.DataWrittenSuccessfully("A URL-Button Of Inline Keyboard")
-	fm.doRutine()
-	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Label = label
-	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].what = bUrl
-	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Url = url
-
-	fm.Keyboard.x = fm.Keyboard.x + 1
-}
+// 	fm.Keyboard.x = fm.Keyboard.x + 1
+// }

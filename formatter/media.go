@@ -5,49 +5,69 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"os"
 
 	"github.com/l1qwie/Fmtogram/logs"
 )
 
+const (
+	photoMethod     string = "sendPhoto"
+	audipMethod     string = "sendAudio"
+	documentMethod  string = "sendDocument"
+	videoMethod     string = "sendVideo"
+	animationMethod string = "sendAnimation"
+	voiceMethod     string = "sendVoice"
+	videoNoteMethod string = "sendVideoNote"
+)
+
+type handleMedia interface {
+	uniqueFields() (string, error)
+}
+
+type mediaFields struct {
+	data   handleMedia
+	method string
+}
+
 func (fm *Formatter) AddPhotoFromStorage(path string) {
 	logs.DataWrittenSuccessfully("A Photo From The Storage")
-	fm.media.photo.file.File = path
+	fm.Media.mediaFile.file.File = path
 	fm.kindofmedia = []int{fromStorage}
 	fm.mediatype = []string{"photo"}
 }
 
 func (fm *Formatter) AddPhotoFromTG(photoID string) {
 	logs.DataWrittenSuccessfully("A Photo Telegram ID")
-	fm.media.photo.urlOrID = photoID
+	fm.Media.mediaFile.urlOrID = photoID
 	fm.kindofmedia = []int{fromTelegram}
 	fm.mediatype = []string{"photo"}
 }
 
 func (fm *Formatter) AddPhotoFromInternet(URL string) {
-	logs.DataWrittenSuccessfully("A Photo URL From The Internet")
-	fm.media.photo.urlOrID = URL
+	fm.Media.mediaFile.urlOrID = URL
 	fm.kindofmedia = []int{fromInternet}
 	fm.mediatype = []string{"photo"}
+	logs.DataWrittenSuccessfully("A Photo URL From The Internet")
 }
 func (fm *Formatter) AddVideoFromStorage(path string) {
 	logs.DataWrittenSuccessfully("A Video From The Storage")
-	fm.media.video.file.File = path
+	fm.Media.mediaFile.file.File = path
 	fm.kindofmedia = []int{fromStorage}
 	fm.mediatype = []string{"video"}
 }
 
 func (fm *Formatter) AddVideoFromTG(videoID string) {
 	logs.DataWrittenSuccessfully("A Video Telegram ID")
-	fm.media.video.urlOrID = videoID
+	fm.Media.mediaFile.urlOrID = videoID
 	fm.kindofmedia = []int{fromTelegram}
 	fm.mediatype = []string{"video"}
 }
 
 func (fm *Formatter) AddVideoFromInternet(URL string) {
 	logs.DataWrittenSuccessfully("A Video URL From The Internet")
-	fm.media.video.urlOrID = URL
+	fm.Media.mediaFile.urlOrID = URL
 	fm.kindofmedia = []int{fromInternet}
 	fm.mediatype = []string{"video"}
 }
@@ -102,30 +122,46 @@ func (fm *Formatter) AddVideoFromInternet(URL string) {
 // 	return wrtr.FormDataContentType(), err
 // }
 
-func (fm *Formatter) checkTypeOfMedia() (string, func(*os.File, *multipart.Writer, string) (string, string, error), error) {
+func (fm *Formatter) checkTypeOfMedia() (*mediaFields, error) {
 	var (
-		media string
-		ok    bool
-		err   error
+		ok  bool
+		err error
 	)
-	acceptedTypes := make(map[string]func(*os.File, *multipart.Writer, string) (string, string, error), 7)
-	acceptedTypes["photo"] = fm.fromStoragePhoto
-	acceptedTypes["audio"] = fm.fromStorageAudio
-	acceptedTypes["document"] = fm.fromStorageDocument
-	acceptedTypes["video"] = fm.fromStorageVideo
-	acceptedTypes["animation"] = fm.fromStorageAnimation
-	acceptedTypes["voice"] = fm.fromStorageVoice
-	acceptedTypes["video-note"] = fm.fromStorageVideoNote
 
-	f, found := acceptedTypes[fm.mediatype[0]]
+	acceptedTypes := make(map[string]*mediaFields, 7)
+	acceptedTypes["photo"] = &mediaFields{data: &photo{fm}, method: photoMethod}
+	acceptedTypes["audio"] = &mediaFields{data: &audio{fm}, method: audipMethod}
+	acceptedTypes["document"] = &mediaFields{data: &document{fm}, method: audipMethod}
+	acceptedTypes["video"] = &mediaFields{data: &video{fm}, method: audipMethod}
+	acceptedTypes["animation"] = &mediaFields{data: &animation{fm}, method: audipMethod}
+	acceptedTypes["voice"] = &mediaFields{data: &voice{fm}, method: audipMethod}
+	acceptedTypes["video-note"] = &mediaFields{data: &videoNote{fm}, method: audipMethod}
+
+	media, found := acceptedTypes[fm.mediatype[0]]
 
 	if found {
-		media, ok = fm.media.video.file.File.(string)
+		if fm.Media.mediaFile.urlOrID == "" {
+			fm.path, ok = fm.Media.mediaFile.file.File.(string)
+		} else if fm.mediatype[0] == "photo" {
+			fm.Media.Photo = fm.Media.mediaFile.urlOrID
+		} else if fm.mediatype[0] == "audio" {
+			fm.Media.Audio = fm.Media.mediaFile.urlOrID
+		} else if fm.mediatype[0] == "document" {
+			fm.Media.Document = fm.Media.mediaFile.urlOrID
+		} else if fm.mediatype[0] == "video" {
+			fm.Media.Video = fm.Media.mediaFile.urlOrID
+		} else if fm.mediatype[0] == "animation" {
+			fm.Media.Animation = fm.Media.mediaFile.urlOrID
+		} else if fm.mediatype[0] == "voice" {
+			fm.Media.Voice = fm.Media.mediaFile.urlOrID
+		} else if fm.mediatype[0] == "video-note" {
+			fm.Media.VideoNote = fm.Media.mediaFile.urlOrID
+		}
 	}
-	if !ok {
-		err = fmt.Errorf("The file path is supposted to be 'string' type, but there's something else. Please, make sure you give a 'string' type value")
+	if !ok && fm.Media.mediaFile.urlOrID == "" {
+		err = fmt.Errorf("the file path is supposted to be 'string' type, but there's something else. Please, make sure you give a 'string' type value")
 	}
-	return media, f, err
+	return media, err
 }
 
 func writeToFile(file *os.File, writer *multipart.Writer, mediatype, path string) error {
@@ -138,24 +174,24 @@ func writeToFile(file *os.File, writer *multipart.Writer, mediatype, path string
 
 func (fm *Formatter) durationWidthHeight(writer *multipart.Writer) error {
 	var err error
-	if fm.char.duration != 0 {
-		err = writer.WriteField("duration", fmt.Sprintf("%d", fm.char.duration))
+	if fm.Char.Duration != 0 {
+		err = writer.WriteField("duration", fmt.Sprintf("%d", fm.Char.Duration))
 	}
-	if err == nil && fm.media.width != 0 {
-		err = writer.WriteField("width", fmt.Sprintf("%d", fm.media.width))
+	if err == nil && fm.Media.Width != 0 {
+		err = writer.WriteField("width", fmt.Sprintf("%d", fm.Media.Width))
 	}
-	if err == nil && fm.media.height != 0 {
-		err = writer.WriteField("height", fmt.Sprintf("%d", fm.media.height))
+	if err == nil && fm.Media.Height != 0 {
+		err = writer.WriteField("height", fmt.Sprintf("%d", fm.Media.Height))
 	}
 	return err
 }
 
 func (fm *Formatter) showCapAbMediaHasSpoiler(writer *multipart.Writer) error {
 	var err error
-	if fm.message.showCaptionAboveMedia {
+	if fm.Message.ShowCaptionAboveMedia {
 		err = writer.WriteField("show_caption_above_media", "True")
 	}
-	if err == nil && fm.char.hasSpoiler {
+	if err == nil && fm.Char.HasSpoiler {
 		err = writer.WriteField("has_spoiler", "True")
 	}
 	return err
@@ -167,10 +203,10 @@ func (fm *Formatter) thumbnail(file *os.File, writer *multipart.Writer) error {
 		err       error
 		part      io.Writer
 	)
-	if fm.media.thumbnail.urlOrID == "" {
-		thumbpath = fm.media.thumbnail.file.File.(string)
+	if fm.Media.Thumbnail.urlOrID == "" {
+		thumbpath = fm.Media.Thumbnail.file.File.(string)
 	} else {
-		thumbpath = fm.media.thumbnail.urlOrID
+		thumbpath = fm.Media.Thumbnail.urlOrID
 	}
 	if thumbpath != "" {
 		part, err = writer.CreateFormFile("thumbnail", thumbpath)
@@ -181,135 +217,132 @@ func (fm *Formatter) thumbnail(file *os.File, writer *multipart.Writer) error {
 	return err
 }
 
-func (fm *Formatter) fromStoragePhoto(file *os.File, writer *multipart.Writer, path string) (string, string, error) {
-	err := writeToFile(file, writer, "photo", path)
+func (photo *photo) uniqueFields() (string, error) {
+	err := writeToFile(photo.fm.file, photo.fm.writer, "photo", photo.fm.path)
 	if err == nil {
-		err = fm.showCapAbMediaHasSpoiler(writer)
+		err = photo.fm.showCapAbMediaHasSpoiler(photo.fm.writer)
 	}
-	return writer.FormDataContentType(), "sendPhoto", err
+	return photo.fm.writer.FormDataContentType(), err
 }
 
-func (fm *Formatter) fromStorageAudio(file *os.File, writer *multipart.Writer, path string) (string, string, error) {
-	err := writeToFile(file, writer, "audio", path)
-	if err == nil && fm.char.duration != 0 {
-		err = writer.WriteField("duration", fmt.Sprintf("%d", fm.char.duration))
+func (audio *audio) uniqueFields() (string, error) {
+	err := writeToFile(audio.fm.file, audio.fm.writer, "audio", audio.fm.path)
+	if err == nil && audio.fm.Char.Duration != 0 {
+		err = audio.fm.writer.WriteField("duration", fmt.Sprintf("%d", audio.fm.Char.Duration))
 	}
-	if err == nil && fm.char.performer != "" {
-		err = writer.WriteField("performer", fm.char.performer)
+	if err == nil && audio.fm.Char.Performer != "" {
+		err = audio.fm.writer.WriteField("performer", audio.fm.Char.Performer)
 	}
 	if err == nil {
-		err = fm.thumbnail(file, writer)
+		err = audio.fm.thumbnail(audio.fm.file, audio.fm.writer)
 	}
-	return writer.FormDataContentType(), "sendAudio", err
+	return audio.fm.writer.FormDataContentType(), err
 }
 
-func (fm *Formatter) fromStorageDocument(file *os.File, writer *multipart.Writer, path string) (string, string, error) {
-	err := writeToFile(file, writer, "document", path)
+func (doc *document) uniqueFields() (string, error) {
+	err := writeToFile(doc.fm.file, doc.fm.writer, "document", doc.fm.path)
 	if err == nil {
-		err = fm.thumbnail(file, writer)
+		err = doc.fm.thumbnail(doc.fm.file, doc.fm.writer)
 	}
-	if err == nil && fm.media.disableContentType {
-		err = writer.WriteField("disable_content_type_detection", "True")
+	if err == nil && doc.fm.Media.DisableContentType {
+		err = doc.fm.writer.WriteField("disable_content_type_detection", "True")
 	}
-	return writer.FormDataContentType(), "sendDocument", err
+	return doc.fm.writer.FormDataContentType(), err
 }
 
-func (fm *Formatter) fromStorageVideo(file *os.File, writer *multipart.Writer, path string) (string, string, error) {
-	err := writeToFile(file, writer, "video", path)
+func (video *video) uniqueFields() (string, error) {
+	err := writeToFile(video.fm.file, video.fm.writer, "video", video.fm.path)
 	if err == nil {
-		err = fm.durationWidthHeight(writer)
-	}
-	if err == nil {
-		err = fm.thumbnail(file, writer)
+		err = video.fm.durationWidthHeight(video.fm.writer)
 	}
 	if err == nil {
-		err = fm.showCapAbMediaHasSpoiler(writer)
+		err = video.fm.thumbnail(video.fm.file, video.fm.writer)
 	}
-	if err == nil && fm.media.supportsStreaming {
-		err = writer.WriteField("supports_streaming", "True")
+	if err == nil {
+		err = video.fm.showCapAbMediaHasSpoiler(video.fm.writer)
 	}
-	return writer.FormDataContentType(), "sendVideo", err
+	if err == nil && video.fm.Media.SupportsStreaming {
+		err = video.fm.writer.WriteField("supports_streaming", "True")
+	}
+	return video.fm.writer.FormDataContentType(), err
 }
 
-func (fm *Formatter) fromStorageAnimation(file *os.File, writer *multipart.Writer, path string) (string, string, error) {
-	err := writeToFile(file, writer, "animation", path)
+func (anim *animation) uniqueFields() (string, error) {
+	err := writeToFile(anim.fm.file, anim.fm.writer, "animation", anim.fm.path)
 	if err == nil {
-		err = fm.durationWidthHeight(writer)
+		err = anim.fm.durationWidthHeight(anim.fm.writer)
 	}
 	if err == nil {
-		err = fm.thumbnail(file, writer)
+		err = anim.fm.thumbnail(anim.fm.file, anim.fm.writer)
 	}
 	if err == nil {
-		err = fm.showCapAbMediaHasSpoiler(writer)
+		err = anim.fm.showCapAbMediaHasSpoiler(anim.fm.writer)
 	}
-	return writer.FormDataContentType(), "sendAnimation", err
+	return anim.fm.writer.FormDataContentType(), err
 }
 
-func (fm *Formatter) fromStorageVoice(file *os.File, writer *multipart.Writer, path string) (string, string, error) {
-	err := writeToFile(file, writer, "voice", path)
-	if err == nil && fm.char.duration != 0 {
-		err = writer.WriteField("duration", fmt.Sprintf("%d", fm.char.duration))
+func (voice *voice) uniqueFields() (string, error) {
+	err := writeToFile(voice.fm.file, voice.fm.writer, "voice", voice.fm.path)
+	if err == nil && voice.fm.Char.Duration != 0 {
+		err = voice.fm.writer.WriteField("duration", fmt.Sprintf("%d", voice.fm.Char.Duration))
 	}
-	return writer.FormDataContentType(), "sendVoice", err
+	return voice.fm.writer.FormDataContentType(), err
 }
 
-func (fm *Formatter) fromStorageVideoNote(file *os.File, writer *multipart.Writer, path string) (string, string, error) {
-	err := writeToFile(file, writer, "video_note", path)
-	if err == nil && fm.char.duration != 0 {
-		err = writer.WriteField("duration", fmt.Sprintf("%d", fm.char.duration))
+func (vn *videoNote) uniqueFields() (string, error) {
+	err := writeToFile(vn.fm.file, vn.fm.writer, "video_note", vn.fm.path)
+	if err == nil && vn.fm.Char.Duration != 0 {
+		err = vn.fm.writer.WriteField("duration", fmt.Sprintf("%d", vn.fm.Char.Duration))
 	}
-	if err == nil && fm.media.length != 0 {
-		err = writer.WriteField("length", fmt.Sprintf("%d", fm.media.length))
+	if err == nil && vn.fm.Media.Length != 0 {
+		err = vn.fm.writer.WriteField("length", fmt.Sprintf("%d", vn.fm.Media.Length))
 	}
 	if err == nil {
-		err = fm.thumbnail(file, writer)
+		err = vn.fm.thumbnail(vn.fm.file, vn.fm.writer)
 	}
-	return writer.FormDataContentType(), "sendVideoNote", err
+	return vn.fm.writer.FormDataContentType(), err
 }
 
-func (fm *Formatter) commonMediaFields(file *os.File, writer *multipart.Writer) error {
+func (fm *Formatter) commonMediaFields(writer *multipart.Writer) error {
 	var err error
-	// file, err := os.Open(media)
-	// if err == nil {
-	// }
-	if err == nil && fm.chat.businessConnectionID != "" {
-		err = writer.WriteField("business_connection_id", fmt.Sprintf("%d", fm.chat.businessConnectionID))
+	if fm.Business.BusinessConnectionID != "" {
+		err = writer.WriteField("business_connection_id", fm.Business.BusinessConnectionID)
 	}
 	if err == nil {
-		err = writer.WriteField("chat_id", fmt.Sprintf("%d", fm.chat.chatID))
+		err = writer.WriteField("chat_id", fmt.Sprintf("%d", fm.Chat.ChatID))
 	}
-	if err == nil && fm.message.threadID != "" {
-		err = writer.WriteField("message_thread_id", fmt.Sprintf("%d", fm.message.threadID))
+	if err == nil && fm.Message.ThreadID != "" {
+		err = writer.WriteField("message_thread_id", fm.Message.ThreadID)
 	}
-	if err == nil && fm.message.text != "" {
-		err = writer.WriteField("caption", fm.message.text)
+	if err == nil && fm.Message.Text != "" {
+		err = writer.WriteField("caption", fm.Message.Text)
 	}
-	if err == nil && fm.message.parseMode != "" {
-		err = writer.WriteField("parse_mode", fm.message.parseMode)
+	if err == nil && fm.Message.ParseMode != "" {
+		err = writer.WriteField("parse_mode", fm.Message.ParseMode)
 	}
-	if err == nil && len(fm.message.captionEntities) > 0 {
-		body, err1 := json.Marshal(fm.message.captionEntities)
+	if err == nil && len(fm.Message.CaptionEntities) > 0 {
+		body, err1 := json.Marshal(fm.Message.CaptionEntities)
 		if err1 == nil {
 			err = writer.WriteField("caption_entities", string(body))
 		}
 	}
-	if err == nil && fm.char.disableNotification {
+	if err == nil && fm.Char.DisableNotification {
 		err = writer.WriteField("disable_notification", "True")
 	}
-	if err == nil && fm.char.protectContent {
+	if err == nil && fm.Char.ProtectContent {
 		err = writer.WriteField("protect_content", "True")
 	}
-	if err == nil && fm.message.effectID != "" {
-		err = writer.WriteField("message_effect_id", fm.message.effectID)
+	if err == nil && fm.Message.EffectID != "" {
+		err = writer.WriteField("message_effect_id", fm.Message.EffectID)
 	}
-	if err == nil && fm.chat.replyParameters != nil {
-		body, err1 := json.Marshal(fm.chat.replyParameters)
+	if err == nil && fm.Chat.ReplyParameters.MessageID != 0 {
+		body, err1 := json.Marshal(fm.Chat.ReplyParameters)
 		if err1 == nil {
 			err = writer.WriteField("reply_parameters", string(body))
 		}
 	}
-	if err == nil && fm.message.replyMarkup != nil {
-		body, err1 := json.Marshal(fm.message.replyMarkup)
+	if err == nil && fm.Message.ReplyMarkup != nil {
+		body, err1 := json.Marshal(fm.Message.ReplyMarkup)
 		if err1 == nil {
 			err = writer.WriteField("reply_markup", string(body))
 		}
@@ -317,21 +350,51 @@ func (fm *Formatter) commonMediaFields(file *os.File, writer *multipart.Writer) 
 	return err
 }
 
-func (fm *Formatter) PrepareMedia(buf *bytes.Buffer) (string, error) {
-	var tgMethod string
-	file := new(os.File)
-	writer := new(multipart.Writer)
-	media, f, err := fm.checkTypeOfMedia()
+func (fm *Formatter) fromStorageMedia(buf *bytes.Buffer) (string, error) {
+	fm.file = new(os.File)
+	fm.writer = multipart.NewWriter(buf)
+	media, err := fm.checkTypeOfMedia()
 	if err == nil {
-		file, err = os.Open(media)
+		fm.file, err = os.Open(fm.path)
 	}
 	if err == nil {
-		fm.contenttype, tgMethod, err = f(file, writer, media)
+		fm.contenttype, err = media.data.uniqueFields()
 	}
 	if err == nil {
-		err = fm.commonMediaFields(file, writer)
+		err = fm.commonMediaFields(fm.writer)
 	}
-	return tgMethod, err
+	return media.method, err
+}
+
+func (fm *Formatter) tgOrURLMedia(buf *bytes.Buffer) (string, error) {
+	var (
+		jsonMes          []byte
+		map1, map2, map3 map[string]interface{}
+	)
+	media, err := fm.checkTypeOfMedia()
+	if err == nil {
+		if fm.Message.Text != "" {
+			fm.Message.Caption = fm.Message.Text
+		}
+		body, err := json.Marshal(fm.Message)
+		if err == nil {
+
+			jsonMes = append(jsonMes, body...)
+			body, err = json.Marshal(fm.Chat)
+			if err == nil {
+				jsonMes = append(jsonMes, body...)
+				body, err = json.Marshal(fm.Media)
+				if err == nil {
+
+					log.Print(fm.Media.Photo)
+					jsonMes = append(jsonMes, body...)
+					buf.Write(jsonMes)
+				}
+			}
+		}
+		log.Print(string(jsonMes))
+	}
+	return media.method, err
 }
 
 // func (fm *Formatter) PrepareMediaForEdit(buf *bytes.Buffer) (string, error) {

@@ -442,9 +442,11 @@ type TelegramError struct {
 }
 
 type Telegram struct {
-	Ok     bool           `json:"ok"`
-	Result []*Update      `json:"result,omitempty"`
-	Error  *TelegramError `json:"error,omitempty"`
+	Ok          bool           `json:"ok"`
+	Result      []*Update      `json:"result,omitempty"`
+	Error       *TelegramError `json:"error,omitempty"`
+	ErrorCode   int            `json:"error_code,omitempty"`
+	Description string         `json:"description,omitempty"`
 }
 
 type GetMe struct {
