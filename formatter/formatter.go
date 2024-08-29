@@ -122,18 +122,18 @@ func (fm *Formatter) mediaGroup() error {
 	return err
 }
 
-func (fm *Formatter) MediaPreparing() (*bytes.Buffer, string, error) {
+func (fm *Formatter) MediaPreparing() (*bytes.Buffer, string, string, error) {
 	var (
-		err    error
-		method string
+		err                 error
+		method, contenttype string
 	)
 	buf := bytes.NewBuffer(nil)
 	if fm.kindofmedia[0] == fromStorage {
-		method, err = fm.fromStorageMedia(buf)
+		method, contenttype, err = fm.fromStorageMedia(buf)
 	} else {
-		method, err = fm.tgOrURLMedia(buf)
+		method, contenttype, err = fm.tgOrURLMedia(buf)
 	}
-	return buf, method, err
+	return buf, method, contenttype, err
 }
 
 func (fm *Formatter) Make() (*types.Telegram, error) {

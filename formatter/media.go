@@ -32,17 +32,17 @@ type mediaFields struct {
 }
 
 func (fm *Formatter) AddPhotoFromStorage(path string) {
-	logs.DataWrittenSuccessfully("A Photo From The Storage")
 	fm.Media.mediaFile.file.File = path
 	fm.kindofmedia = []int{fromStorage}
 	fm.mediatype = []string{"photo"}
+	logs.DataWrittenSuccessfully("A Photo From The Storage")
 }
 
 func (fm *Formatter) AddPhotoFromTG(photoID string) {
-	logs.DataWrittenSuccessfully("A Photo Telegram ID")
 	fm.Media.mediaFile.urlOrID = photoID
 	fm.kindofmedia = []int{fromTelegram}
 	fm.mediatype = []string{"photo"}
+	logs.DataWrittenSuccessfully("A Photo Telegram ID")
 }
 
 func (fm *Formatter) AddPhotoFromInternet(URL string) {
@@ -52,24 +52,66 @@ func (fm *Formatter) AddPhotoFromInternet(URL string) {
 	logs.DataWrittenSuccessfully("A Photo URL From The Internet")
 }
 func (fm *Formatter) AddVideoFromStorage(path string) {
-	logs.DataWrittenSuccessfully("A Video From The Storage")
 	fm.Media.mediaFile.file.File = path
 	fm.kindofmedia = []int{fromStorage}
 	fm.mediatype = []string{"video"}
+	logs.DataWrittenSuccessfully("A Video From The Storage")
 }
 
 func (fm *Formatter) AddVideoFromTG(videoID string) {
-	logs.DataWrittenSuccessfully("A Video Telegram ID")
 	fm.Media.mediaFile.urlOrID = videoID
 	fm.kindofmedia = []int{fromTelegram}
 	fm.mediatype = []string{"video"}
+	logs.DataWrittenSuccessfully("A Video Telegram ID")
 }
 
 func (fm *Formatter) AddVideoFromInternet(URL string) {
-	logs.DataWrittenSuccessfully("A Video URL From The Internet")
 	fm.Media.mediaFile.urlOrID = URL
 	fm.kindofmedia = []int{fromInternet}
 	fm.mediatype = []string{"video"}
+	logs.DataWrittenSuccessfully("A Video URL From The Internet")
+}
+
+func (fm *Formatter) AddAudioFromStorage(path string) {
+	fm.Media.mediaFile.file.File = path
+	fm.kindofmedia = []int{fromStorage}
+	fm.mediatype = []string{"audio"}
+	logs.DataWrittenSuccessfully("An Audio Path From The Storage")
+}
+
+func (fm *Formatter) AddAudioFromTG(audioID string) {
+	fm.Media.mediaFile.urlOrID = audioID
+	fm.kindofmedia = []int{fromTelegram}
+	fm.mediatype = []string{"audio"}
+	logs.DataWrittenSuccessfully("An Audio Telegram ID")
+}
+
+func (fm *Formatter) AddAudioFromInternet(URL string) {
+	fm.Media.mediaFile.urlOrID = URL
+	fm.kindofmedia = []int{fromInternet}
+	fm.mediatype = []string{"audio"}
+	logs.DataWrittenSuccessfully("An Audio URL From The Internet")
+}
+
+func (fm *Formatter) AddDocumentFromStorage(path string) {
+	fm.Media.mediaFile.file.File = path
+	fm.kindofmedia = []int{fromStorage}
+	fm.mediatype = []string{"document"}
+	logs.DataWrittenSuccessfully("A Document Path From The Storage")
+}
+
+func (fm *Formatter) AddDocumentFromTG(documentID string) {
+	fm.Media.mediaFile.urlOrID = documentID
+	fm.kindofmedia = []int{fromTelegram}
+	fm.mediatype = []string{"document"}
+	logs.DataWrittenSuccessfully("A Document Telegram ID")
+}
+
+func (fm *Formatter) AddDocumentFromInternet(URL string) {
+	fm.Media.mediaFile.urlOrID = URL
+	fm.kindofmedia = []int{fromInternet}
+	fm.mediatype = []string{"document"}
+	logs.DataWrittenSuccessfully("A Document URL From The Internet")
 }
 
 // func (fm *Formatter) AddMapOfMedia(arr []types.Media) {
@@ -131,11 +173,11 @@ func (fm *Formatter) checkTypeOfMedia() (*mediaFields, error) {
 	acceptedTypes := make(map[string]*mediaFields, 7)
 	acceptedTypes["photo"] = &mediaFields{data: &photo{fm}, method: photoMethod}
 	acceptedTypes["audio"] = &mediaFields{data: &audio{fm}, method: audipMethod}
-	acceptedTypes["document"] = &mediaFields{data: &document{fm}, method: audipMethod}
-	acceptedTypes["video"] = &mediaFields{data: &video{fm}, method: audipMethod}
-	acceptedTypes["animation"] = &mediaFields{data: &animation{fm}, method: audipMethod}
-	acceptedTypes["voice"] = &mediaFields{data: &voice{fm}, method: audipMethod}
-	acceptedTypes["video-note"] = &mediaFields{data: &videoNote{fm}, method: audipMethod}
+	acceptedTypes["document"] = &mediaFields{data: &document{fm}, method: documentMethod}
+	acceptedTypes["video"] = &mediaFields{data: &video{fm}, method: videoMethod}
+	acceptedTypes["animation"] = &mediaFields{data: &animation{fm}, method: animationMethod}
+	acceptedTypes["voice"] = &mediaFields{data: &voice{fm}, method: voiceMethod}
+	acceptedTypes["video-note"] = &mediaFields{data: &videoNote{fm}, method: videoNoteMethod}
 
 	media, found := acceptedTypes[fm.mediatype[0]]
 
@@ -165,6 +207,7 @@ func (fm *Formatter) checkTypeOfMedia() (*mediaFields, error) {
 }
 
 func writeToFile(file *os.File, writer *multipart.Writer, mediatype, path string) error {
+	defer file.Close()
 	part, err := writer.CreateFormFile(mediatype, path)
 	if err == nil {
 		_, err = io.Copy(part, file)
@@ -203,12 +246,14 @@ func (fm *Formatter) thumbnail(file *os.File, writer *multipart.Writer) error {
 		err       error
 		part      io.Writer
 	)
+	ok := true
 	if fm.Media.Thumbnail.urlOrID == "" {
-		thumbpath = fm.Media.Thumbnail.file.File.(string)
+		thumbpath, ok = fm.Media.Thumbnail.file.File.(string)
+		log.Print(thumbpath, ok)
 	} else {
 		thumbpath = fm.Media.Thumbnail.urlOrID
 	}
-	if thumbpath != "" {
+	if thumbpath != "" && ok {
 		part, err = writer.CreateFormFile("thumbnail", thumbpath)
 		if err == nil {
 			_, err = io.Copy(part, file)
@@ -350,7 +395,7 @@ func (fm *Formatter) commonMediaFields(writer *multipart.Writer) error {
 	return err
 }
 
-func (fm *Formatter) fromStorageMedia(buf *bytes.Buffer) (string, error) {
+func (fm *Formatter) fromStorageMedia(buf *bytes.Buffer) (string, string, error) {
 	fm.file = new(os.File)
 	fm.writer = multipart.NewWriter(buf)
 	media, err := fm.checkTypeOfMedia()
@@ -363,38 +408,51 @@ func (fm *Formatter) fromStorageMedia(buf *bytes.Buffer) (string, error) {
 	if err == nil {
 		err = fm.commonMediaFields(fm.writer)
 	}
-	return media.method, err
+	if err == nil {
+		defer fm.writer.Close()
+	}
+	return media.method, fm.writer.FormDataContentType(), err
 }
 
-func (fm *Formatter) tgOrURLMedia(buf *bytes.Buffer) (string, error) {
+func (fm *Formatter) tgOrURLMedia(buf *bytes.Buffer) (string, string, error) {
 	var (
-		jsonMes          []byte
-		map1, map2, map3 map[string]interface{}
+		body1, body2, body3, finalbody []byte
 	)
+	map1 := make(map[string]interface{})
+	map2 := make(map[string]interface{})
+	map3 := make(map[string]interface{})
+	finalmap := make(map[string]interface{})
 	media, err := fm.checkTypeOfMedia()
 	if err == nil {
 		if fm.Message.Text != "" {
 			fm.Message.Caption = fm.Message.Text
 		}
-		body, err := json.Marshal(fm.Message)
+		body1, err = json.Marshal(fm.Message)
+		body2, err = json.Marshal(fm.Chat)
+		body3, err = json.Marshal(fm.Media)
 		if err == nil {
-
-			jsonMes = append(jsonMes, body...)
-			body, err = json.Marshal(fm.Chat)
+			err = json.Unmarshal(body1, &map1)
+			err = json.Unmarshal(body2, &map2)
+			err = json.Unmarshal(body3, &map3)
 			if err == nil {
-				jsonMes = append(jsonMes, body...)
-				body, err = json.Marshal(fm.Media)
+				for k, v := range map1 {
+					finalmap[k] = v
+				}
+				for k, v := range map2 {
+					finalmap[k] = v
+				}
+				for k, v := range map3 {
+					finalmap[k] = v
+				}
+				finalbody, err = json.Marshal(&finalmap)
 				if err == nil {
-
-					log.Print(fm.Media.Photo)
-					jsonMes = append(jsonMes, body...)
-					buf.Write(jsonMes)
+					buf.Write(finalbody)
 				}
 			}
 		}
-		log.Print(string(jsonMes))
+		log.Print(string(finalbody))
 	}
-	return media.method, err
+	return media.method, "application/json", err
 }
 
 // func (fm *Formatter) PrepareMediaForEdit(buf *bytes.Buffer) (string, error) {

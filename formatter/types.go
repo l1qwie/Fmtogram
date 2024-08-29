@@ -91,17 +91,17 @@ type videoNote struct {
 }
 
 type message struct {
-	Text                  string                 `json:"text,omitempty"`
-	Caption               string                 `json:"caption,omitempty"`
-	MessageID             interface{}            `json:"message_id,omitempty"`
-	ParseMode             string                 `json:"parse_mode,omitempty"`
-	ProtectContent        bool                   `json:"protect_content,omitempty"`
-	ReplyParameters       *types.ReplyParameters `json:"reply_parameters,omitempty"`
-	ReplyMarkup           interface{}            `json:"reply_markup,omitempty"`
-	ThreadID              string                 `json:"message_thread_id,omitempty"`
-	CaptionEntities       []*types.MessageEntity `json:"caption_entities,omitempty"`
-	ShowCaptionAboveMedia bool                   `json:"show_caption_above_media,omitempty"`
-	EffectID              string                 `json:"message_effect_id,omitempty"`
+	Text                  string                `json:"text,omitempty"`
+	Caption               string                `json:"caption,omitempty"`
+	MessageID             interface{}           `json:"message_id,omitempty"`
+	ParseMode             string                `json:"parse_mode,omitempty"`
+	ProtectContent        bool                  `json:"protect_content,omitempty"`
+	ReplyParameters       types.ReplyParameters `json:"reply_parameters,omitempty"`
+	ReplyMarkup           interface{}           `json:"reply_markup,omitempty"`
+	ThreadID              string                `json:"message_thread_id,omitempty"`
+	CaptionEntities       []types.MessageEntity `json:"caption_entities,omitempty"`
+	ShowCaptionAboveMedia bool                  `json:"show_caption_above_media,omitempty"`
+	EffectID              string                `json:"message_effect_id,omitempty"`
 	action                int
 }
 
@@ -110,8 +110,8 @@ type user struct {
 }
 
 type chat struct {
-	ChatID          interface{}            `json:"chat_id,omitempty"`
-	ReplyParameters *types.ReplyParameters `json:"reply_parameters,omitempty"`
+	ChatID          interface{}           `json:"chat_id,omitempty"`
+	ReplyParameters types.ReplyParameters `json:"reply_parameters,omitempty"`
 }
 
 type mediaStorage struct {

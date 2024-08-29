@@ -460,3 +460,11 @@ type BadResponse struct {
 	ErrorCode   int    `json:"error_code"`
 	Description string `json:"description"`
 }
+
+type MessageResponse struct {
+	Ok          bool           `json:"ok"`
+	Result      *Message       `json:"result,omitempty"`
+	Error       *TelegramError `json:"error,omitempty"`
+	ErrorCode   int            `json:"error_code,omitempty"`
+	Description string         `json:"description,omitempty"`
+}
