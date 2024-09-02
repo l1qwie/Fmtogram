@@ -26,7 +26,8 @@ type InputMediaPhoto struct {
 }
 
 type InputMedia struct {
-	InputMediaPhoto InputMediaPhoto `json:"InputMediaPhoto"`
+	Type  string `json:"type"`
+	Media string `json:"media"`
 }
 
 type btnKind int
@@ -115,12 +116,11 @@ type chat struct {
 }
 
 type mediaStorage struct {
-	file    types.InputFile
-	urlOrID string
+	mediaData string
 }
 
 type media struct {
-	mediaFile          mediaStorage
+	Group              []InputMedia `json:"media,omitempty"`
 	Photo              string       `json:"photo,omitempty"`
 	Audio              string       `json:"audio,omitempty"`
 	Document           string       `json:"document,omitempty"`
@@ -134,6 +134,8 @@ type media struct {
 	Height             int          `json:"height,omitempty"`
 	SupportsStreaming  bool         `json:"supports_streaming,omitempty"`
 	Length             int          `json:"length,omitempty"`
+	// group              []mediaStorage
+	mediaFile mediaStorage
 }
 
 type business struct {
@@ -155,7 +157,7 @@ type Formatter struct {
 	Chat     chat
 	Media    media
 	Char     characteristics
-	Photo    media
+	// Photo    media
 	// Message        SendMessage
 	// Keyboard    InlineKeyboard
 	// Err         error

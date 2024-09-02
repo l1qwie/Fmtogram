@@ -208,17 +208,18 @@ type InputPaidMediaPhoto struct {
 }
 
 type InputPaidMediaVideo struct {
-	Type              string      `json:"type"`
-	Media             string      `json:"media"`
-	Thumbnail         interface{} `json:"thumbnail,omitempty"` // InputFile or String
-	Width             int         `json:"width,omitempty"`
-	Height            int         `json:"height,omitempty"`
-	Duration          int         `json:"duration,omitempty"`
-	SupportsStreaming bool        `json:"supports_streaming,omitempty"`
+	Type              string `json:"type"`
+	Media             string `json:"media"`
+	thumbpath         string
+	Thumbnail         string `json:"thumbnail,omitempty"` // InputFile or String
+	Width             int    `json:"width,omitempty"`
+	Height            int    `json:"height,omitempty"`
+	Duration          int    `json:"duration,omitempty"`
+	SupportsStreaming bool   `json:"supports_streaming,omitempty"`
 }
 
 type InputFile struct {
-	File interface{}
+	File string
 }
 
 type InputPaidMedia struct {

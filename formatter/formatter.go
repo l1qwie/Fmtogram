@@ -3,37 +3,12 @@ package formatter
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 
 	"github.com/l1qwie/Fmtogram/executer"
 	"github.com/l1qwie/Fmtogram/logs"
 	"github.com/l1qwie/Fmtogram/types"
 )
-
-// Save a text of the message for sending
-func (fm *Formatter) WriteString(text string) {
-	logs.DataWrittenSuccessfully("Text Of The Message")
-	fm.Message.Text = text
-}
-
-// Save a Chat name of a chat for sending
-func (fm *Formatter) WriteChatName(chatname string) {
-	logs.DataWrittenSuccessfully("Chatname")
-	fm.Chat.ChatID = fmt.Sprint("@", chatname)
-}
-
-// Save a Chat ID of a chat for sending
-func (fm *Formatter) WriteChatId(chatID int) {
-	logs.DataWrittenSuccessfully("ChatID")
-	fm.Chat.ChatID = chatID
-}
-
-// Save a Parse Mode of the message for sending
-func (fm *Formatter) WriteParseMode(mode string) {
-	logs.DataWrittenSuccessfully("Parse Mode")
-	fm.Message.ParseMode = mode
-}
 
 // Save a Deleted Message ID for future deleting
 func (fm *Formatter) WriteDeleteMesId(mesID int) {
@@ -116,11 +91,11 @@ func (fm *Formatter) editMessage() (*bytes.Buffer, string, error) {
 	return buf, "editMessageText", err
 }
 
-func (fm *Formatter) mediaGroup() error {
-	buf, err := fm.makebuf()
-	_ = executer.Send(buf, "sendMediaGroup", "application/json", true)
-	return err
-}
+// func (fm *Formatter) mediaGroup() error {
+// 	buf, err := fm.makebuf()
+// 	_ = executer.Send(buf, "sendMediaGroup", "application/json", true)
+// 	return err
+// }
 
 func (fm *Formatter) MediaPreparing() (*bytes.Buffer, string, string, error) {
 	var (
@@ -128,10 +103,14 @@ func (fm *Formatter) MediaPreparing() (*bytes.Buffer, string, string, error) {
 		method, contenttype string
 	)
 	buf := bytes.NewBuffer(nil)
-	if fm.kindofmedia[0] == fromStorage {
-		method, contenttype, err = fm.fromStorageMedia(buf)
+	if len(fm.kindofmedia) == 1 {
+		if fm.kindofmedia[0] == fromStorage {
+			method, contenttype, err = fm.fromStorageMedia(buf)
+		} else {
+			method, contenttype, err = fm.tgOrURLMedia(buf)
+		}
 	} else {
-		method, contenttype, err = fm.tgOrURLMedia(buf)
+		method, contenttype, err = fm.mediaGroup(buf)
 	}
 	return buf, method, contenttype, err
 }

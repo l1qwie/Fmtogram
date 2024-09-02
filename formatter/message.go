@@ -1,5 +1,36 @@
 package formatter
 
+import (
+	"github.com/l1qwie/Fmtogram/logs"
+	"github.com/l1qwie/Fmtogram/types"
+)
+
+// func (fm *Formatter) WriteMessageID()
+// ReplyParameters
+// ReplyMarkup
+
+// Save a text of the message for sending
+func (fm *Formatter) WriteString(text string) {
+	fm.Message.Text = text
+	logs.DataWrittenSuccessfully("Text Of The Message")
+}
+
+// Save a Parse Mode of the message for sending
+func (fm *Formatter) WriteParseMode(mode string) {
+	fm.Message.ParseMode = mode
+	logs.DataWrittenSuccessfully("Parse Mode")
+}
+
+func (fm *Formatter) IsProtectedContent() {
+	fm.Message.ProtectContent = true
+	logs.DataWrittenSuccessfully("Protected Content")
+}
+
+func (fm *Formatter) AddCaptionEntities(entities []types.MessageEntity) {
+	fm.Message.CaptionEntities = entities
+
+}
+
 // func (fm *Formatter) SetIkbdDim(dim []int) {
 // 	logs.DataWrittenSuccessfully("The Structure Of Inline Keyboard")
 // 	fm.Keyboard.Keyboard = make([][]btn, len(dim))
