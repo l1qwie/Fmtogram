@@ -86,3 +86,9 @@ func DataWrittenSuccessfully(text string) {
 		log.Printf("[%s] %s saved successfuly", Caption, text)
 	}
 }
+
+func NewObjectCreated(text string) {
+	if types.DEBUG {
+		log.Printf("[%s] %s object has successfuly created", Caption, text)
+	}
+}

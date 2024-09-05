@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"os"
 
+	"github.com/l1qwie/Fmtogram/formatter/media"
 	"github.com/l1qwie/Fmtogram/logs"
 )
 
@@ -28,7 +29,12 @@ type handleMedia interface {
 }
 
 type handleInputMedia interface {
-	uniqueInputFields(*multipart.Writer, int) error
+	uniqueInputFields(int) error
+}
+
+type settings struct {
+	data   media.HandleMedia
+	method string
 }
 
 type mediaFields struct {
@@ -36,123 +42,134 @@ type mediaFields struct {
 	method string
 }
 
-func (fm *Formatter) whereToAdd(mediadata, mediatype string, where int) {
-	if len(fm.kindofmedia) == 1 {
-		fm.Media.Group = append(fm.Media.Group, InputMedia{Type: fm.mediatype[0], Media: fm.Media.mediaFile.mediaData})
-		fm.Media.Group = append(fm.Media.Group, InputMedia{Type: mediatype, Media: mediadata})
-	} else if len(fm.kindofmedia) >= 2 {
-		fm.Media.Group = append(fm.Media.Group, InputMedia{Type: mediatype, Media: mediadata})
-	} else {
-		fm.Media.mediaFile.mediaData = mediadata
-	}
-	fm.kindofmedia = append(fm.kindofmedia, where)
-	fm.mediatype = append(fm.mediatype, mediatype)
+func (fm *Formatter) AddPhotoFromStorage(path string) *media.Photo {
+	photo := &media.Photo{Photo: path, GottenFrom: media.Storage}
+	fm.mediaStorage = append(fm.mediaStorage, photo)
+	logs.NewObjectCreated("Photo")
+	return photo
 }
 
-func (fm *Formatter) AddPhotoFromStorage(path string) {
-	fm.whereToAdd(path, "photo", fromStorage)
-	logs.DataWrittenSuccessfully("A Photo From The Storage")
+func (fm *Formatter) AddPhotoFromTG(photoID string) *media.Photo {
+	photo := &media.Photo{Photo: photoID, GottenFrom: media.Telegram}
+	fm.mediaStorage = append(fm.mediaStorage, photo)
+	logs.NewObjectCreated("Photo")
+	return photo
 }
 
-func (fm *Formatter) AddPhotoFromTG(photoID string) {
-	fm.whereToAdd(photoID, "photo", fromTelegram)
-	logs.DataWrittenSuccessfully("A Photo Telegram ID")
+func (fm *Formatter) AddPhotoFromInternet(URL string) *media.Photo {
+	photo := &media.Photo{Photo: URL, GottenFrom: media.Internet}
+	fm.mediaStorage = append(fm.mediaStorage, photo)
+	logs.NewObjectCreated("Photo")
+	return photo
 }
 
-func (fm *Formatter) AddPhotoFromInternet(URL string) {
-	fm.whereToAdd(URL, "photo", fromInternet)
-	logs.DataWrittenSuccessfully("A Photo URL From The Internet")
+func (fm *Formatter) AddAudioFromStorage(path string) *media.Audio {
+	audio := &media.Audio{Audio: path, AudioGottenFrom: media.Storage}
+	fm.mediaStorage = append(fm.mediaStorage, audio)
+	logs.NewObjectCreated("Audio")
+	return audio
 }
 
-func (fm *Formatter) AddAudioFromStorage(path string) {
-	fm.whereToAdd(path, "audio", fromStorage)
-	logs.DataWrittenSuccessfully("An Audio Path From The Storage")
+func (fm *Formatter) AddAudioFromTG(audioID string) *media.Audio {
+	audio := &media.Audio{Audio: audioID, AudioGottenFrom: media.Telegram}
+	fm.mediaStorage = append(fm.mediaStorage, audio)
+	logs.NewObjectCreated("Audio")
+	return audio
 }
 
-func (fm *Formatter) AddAudioFromTG(audioID string) {
-	fm.whereToAdd(audioID, "audio", fromTelegram)
-	logs.DataWrittenSuccessfully("An Audio Telegram ID")
+func (fm *Formatter) AddAudioFromInternet(URL string) *media.Audio {
+	audio := &media.Audio{Audio: URL, AudioGottenFrom: media.Internet}
+	fm.mediaStorage = append(fm.mediaStorage, audio)
+	logs.NewObjectCreated("Audio")
+	return audio
 }
 
-func (fm *Formatter) AddAudioFromInternet(URL string) {
-	fm.whereToAdd(URL, "audio", fromInternet)
-	logs.DataWrittenSuccessfully("An Audio URL From The Internet")
+func (fm *Formatter) AddDocumentFromStorage(path string) *media.Document {
+	document := &media.Document{Document: path, DocumentGottenFrom: media.Storage}
+	fm.mediaStorage = append(fm.mediaStorage, document)
+	logs.NewObjectCreated("Document")
+	return document
 }
 
-func (fm *Formatter) AddDocumentFromStorage(path string) {
-	fm.whereToAdd(path, "document", fromStorage)
-	logs.DataWrittenSuccessfully("A Document Path From The Storage")
+func (fm *Formatter) AddDocumentFromTG(documentID string) *media.Document {
+	document := &media.Document{Document: documentID, DocumentGottenFrom: media.Telegram}
+	fm.mediaStorage = append(fm.mediaStorage, document)
+	logs.NewObjectCreated("Document")
+	return document
 }
 
-func (fm *Formatter) AddDocumentFromTG(documentID string) {
-	fm.whereToAdd(documentID, "document", fromTelegram)
-	logs.DataWrittenSuccessfully("A Document Telegram ID")
+func (fm *Formatter) AddDocumentFromInternet(URL string) *media.Document {
+	document := &media.Document{Document: URL, DocumentGottenFrom: media.Internet}
+	fm.mediaStorage = append(fm.mediaStorage, document)
+	logs.NewObjectCreated("Document")
+	return document
 }
 
-func (fm *Formatter) AddDocumentFromInternet(URL string) {
-	fm.whereToAdd(URL, "document", fromInternet)
-	logs.DataWrittenSuccessfully("A Document URL From The Internet")
+func (fm *Formatter) AddVideoFromStorage(path string) *media.Video {
+	video := &media.Video{Video: path, VideoGottenFrom: media.Storage}
+	fm.mediaStorage = append(fm.mediaStorage, video)
+	logs.NewObjectCreated("Video")
+	return video
 }
 
-func (fm *Formatter) AddVideoFromStorage(path string) {
-	fm.whereToAdd(path, "video", fromStorage)
-	logs.DataWrittenSuccessfully("A Video From The Storage")
+func (fm *Formatter) AddVideoFromTG(videoID string) *media.Video {
+	video := &media.Video{Video: videoID, VideoGottenFrom: media.Telegram}
+	fm.mediaStorage = append(fm.mediaStorage, video)
+	logs.NewObjectCreated("Video")
+	return video
 }
 
-func (fm *Formatter) AddVideoFromTG(videoID string) {
-	fm.whereToAdd(videoID, "video", fromTelegram)
-	logs.DataWrittenSuccessfully("A Video Telegram ID")
+func (fm *Formatter) AddVideoFromInternet(URL string) *media.Video {
+	video := &media.Video{Video: URL, VideoGottenFrom: media.Internet}
+	fm.mediaStorage = append(fm.mediaStorage, video)
+	logs.NewObjectCreated("Video")
+	return video
 }
 
-func (fm *Formatter) AddVideoFromInternet(URL string) {
-	fm.whereToAdd(URL, "video", fromInternet)
-	logs.DataWrittenSuccessfully("A Video URL From The Internet")
-}
+// func (fm *Formatter) AddAnimationAnimationFromStorage(path string) {
+// 	fm.whereToAdd(path, "animation", fromStorage)
+// 	logs.DataWrittenSuccessfully("An Animation From The Storage")
+// }
 
-func (fm *Formatter) AddAnimationAnimationFromStorage(path string) {
-	fm.whereToAdd(path, "animation", fromStorage)
-	logs.DataWrittenSuccessfully("An Animation From The Storage")
-}
+// func (fm *Formatter) AddAnimationFromTG(animationID string) {
+// 	fm.whereToAdd(animationID, "animation", fromTelegram)
+// 	logs.DataWrittenSuccessfully("An Animation Telegram ID")
+// }
 
-func (fm *Formatter) AddAnimationFromTG(animationID string) {
-	fm.whereToAdd(animationID, "animation", fromTelegram)
-	logs.DataWrittenSuccessfully("An Animation Telegram ID")
-}
+// func (fm *Formatter) AddAnimationFromInternet(URL string) {
+// 	fm.whereToAdd(URL, "animation", fromInternet)
+// 	logs.DataWrittenSuccessfully("An Animation URL From The Internet")
+// }
 
-func (fm *Formatter) AddAnimationFromInternet(URL string) {
-	fm.whereToAdd(URL, "animation", fromInternet)
-	logs.DataWrittenSuccessfully("An Animation URL From The Internet")
-}
+// func (fm *Formatter) AddVoiceFromStorage(path string) {
+// 	fm.whereToAdd(path, "voice", fromStorage)
+// 	logs.DataWrittenSuccessfully("A Voice From The Storage")
+// }
 
-func (fm *Formatter) AddVoiceFromStorage(path string) {
-	fm.whereToAdd(path, "voice", fromStorage)
-	logs.DataWrittenSuccessfully("A Voice From The Storage")
-}
+// func (fm *Formatter) AddVoiceFromTG(voiceID string) {
+// 	fm.whereToAdd(voiceID, "voice", fromTelegram)
+// 	logs.DataWrittenSuccessfully("A Voice Telegram ID")
+// }
 
-func (fm *Formatter) AddVoiceFromTG(voiceID string) {
-	fm.whereToAdd(voiceID, "voice", fromTelegram)
-	logs.DataWrittenSuccessfully("A Voice Telegram ID")
-}
+// func (fm *Formatter) AddVoiceFromInternet(URL string) {
+// 	fm.whereToAdd(URL, "voice", fromInternet)
+// 	logs.DataWrittenSuccessfully("A Voice URL From The Internet")
+// }
 
-func (fm *Formatter) AddVoiceFromInternet(URL string) {
-	fm.whereToAdd(URL, "voice", fromInternet)
-	logs.DataWrittenSuccessfully("A Voice URL From The Internet")
-}
+// func (fm *Formatter) AddVideoNoteFromStorage(path string) {
+// 	fm.whereToAdd(path, "video-note", fromStorage)
+// 	logs.DataWrittenSuccessfully("A VideoNote From The Storage")
+// }
 
-func (fm *Formatter) AddVideoNoteFromStorage(path string) {
-	fm.whereToAdd(path, "video-note", fromStorage)
-	logs.DataWrittenSuccessfully("A VideoNote From The Storage")
-}
+// func (fm *Formatter) AddVideoNoteFromTG(videoNoteID string) {
+// 	fm.whereToAdd(videoNoteID, "video-note", fromTelegram)
+// 	logs.DataWrittenSuccessfully("A VideoNote Telegram ID")
+// }
 
-func (fm *Formatter) AddVideoNoteFromTG(videoNoteID string) {
-	fm.whereToAdd(videoNoteID, "video-note", fromTelegram)
-	logs.DataWrittenSuccessfully("A VideoNote Telegram ID")
-}
-
-func (fm *Formatter) AddVideoNoteFromInternet(URL string) {
-	fm.whereToAdd(URL, "video-note", fromInternet)
-	logs.DataWrittenSuccessfully("A VideoNote URL From The Internet")
-}
+// func (fm *Formatter) AddVideoNoteFromInternet(URL string) {
+// 	fm.whereToAdd(URL, "video-note", fromInternet)
+// 	logs.DataWrittenSuccessfully("A VideoNote URL From The Internet")
+// }
 
 // func (fm *Formatter) AddMapOfMedia(arr []types.Media) {
 // 	i := 0
@@ -204,75 +221,76 @@ func (fm *Formatter) AddVideoNoteFromInternet(URL string) {
 // 	return wrtr.FormDataContentType(), err
 // }
 
-func (fm *Formatter) checkInputMediaType() ([]handleInputMedia, error) {
-	var err error
+// func (fm *Formatter) checkInputMediaType() ([]handleInputMedia, error) {
+// 	var err error
 
-	acceptedInputTypes := make(map[string]handleInputMedia, 4)
-	acceptedInputTypes["photo"] = &photo{fm: fm}
-	acceptedInputTypes["video"] = &video{fm: fm}
-	acceptedInputTypes["audio"] = &audio{fm: fm}
-	acceptedInputTypes["document"] = &document{fm: fm}
+// 	acceptedInputTypes := make(map[string]handleInputMedia, 4)
+// 	acceptedInputTypes["photo"] = &photo{fm: fm}
+// 	acceptedInputTypes["video"] = &video{fm: fm}
+// 	acceptedInputTypes["audio"] = &audio{fm: fm}
+// 	acceptedInputTypes["document"] = &document{fm: fm}
 
-	media := make([]handleInputMedia, len(fm.mediatype))
-	ok := true
-	i := 0
-	for i < len(fm.mediatype) && ok {
-		media[i], ok = acceptedInputTypes[fm.mediatype[i]]
-		i++
-	}
+// 	media := make([]handleInputMedia, len(fm.mediatype))
+// 	ok := true
+// 	i := 0
+// 	for i < len(fm.mediatype) && ok {
+// 		media[i], ok = acceptedInputTypes[fm.mediatype[i]]
+// 		i++
+// 	}
 
-	if !ok {
-		err = fmt.Errorf("the type of media file you've chosen [%s] isn't supported yet. Please choose something among 'photo', 'video', 'document' or 'audio'", fm.mediatype[i])
-	}
-	return media, err
-}
+// 	if !ok {
+// 		err = fmt.Errorf("the type of media file you've chosen [%s] isn't supported yet. Please choose something among 'photo', 'video', 'document' or 'audio'", fm.mediatype[i])
+// 	}
+// 	return media, err
+// }
 
-func (fm *Formatter) checkMediaType() ([]*mediaFields, error) {
-	var err error
+// func (fm *Formatter) checkMediaType() ([]media.HandleMedia, error) {
+// 	var err error
 
-	acceptedTypes := make(map[string]*mediaFields, 7)
-	acceptedTypes["photo"] = &mediaFields{data: &photo{fm}, method: photoMethod}
-	acceptedTypes["audio"] = &mediaFields{data: &audio{fm}, method: audipMethod}
-	acceptedTypes["document"] = &mediaFields{data: &document{fm}, method: documentMethod}
-	acceptedTypes["video"] = &mediaFields{data: &video{fm}, method: videoMethod}
-	acceptedTypes["animation"] = &mediaFields{data: &animation{fm}, method: animationMethod}
-	acceptedTypes["voice"] = &mediaFields{data: &voice{fm}, method: voiceMethod}
-	acceptedTypes["video-note"] = &mediaFields{data: &videoNote{fm}, method: videoNoteMethod}
+// 	acceptedTypes := make(map[string]media.HandleMedia, 7)
+// 	acceptedTypes["photo"] = new(media.Photo)
+// 	acceptedTypes["audio"] = new(media.Audio)
+// 	acceptedTypes["document"] = new(media.Document)
+// 	acceptedTypes["video"] = new(media.Video)
+// 	// acceptedTypes["animation"] = &settings{data: &animation{fm}, method: animationMethod}
+// 	// acceptedTypes["voice"] = &settings{data: &voice{fm}, method: voiceMethod}
+// 	// acceptedTypes["video-note"] = &settings{data: &videoNote{fm}, method: videoNoteMethod}
 
-	media := make([]*mediaFields, len(fm.mediatype))
-	found := true
-	i := 0
+// 	// media := make([]media.HandleMedia, len(fm.mediatype))
+// 	// found := true
+// 	// i := 0
 
-	for i < len(fm.mediatype) && found {
-		media[i], found = acceptedTypes[fm.mediatype[i]]
-		i++
-	}
+// 	// for i < len(fm.mediatype) && found {
+// 	// 	media[i], found = acceptedTypes[fm.mediatype[i]]
+// 	// 	i++
+// 	// }
 
-	if found {
-		if len(fm.mediatype) == 1 {
-			if fm.mediatype[0] == "photo" {
-				fm.Media.Photo = fm.Media.mediaFile.mediaData
-			} else if fm.mediatype[0] == "audio" {
-				fm.Media.Audio = fm.Media.mediaFile.mediaData
-			} else if fm.mediatype[0] == "document" {
-				fm.Media.Document = fm.Media.mediaFile.mediaData
-			} else if fm.mediatype[0] == "video" {
-				fm.Media.Video = fm.Media.mediaFile.mediaData
-			} else if fm.mediatype[0] == "animation" {
-				fm.Media.Animation = fm.Media.mediaFile.mediaData
-			} else if fm.mediatype[0] == "voice" {
-				fm.Media.Voice = fm.Media.mediaFile.mediaData
-			} else if fm.mediatype[0] == "video-note" {
-				fm.Media.VideoNote = fm.Media.mediaFile.mediaData
-			}
-		}
-	} else {
-		err = fmt.Errorf("the type of media [%s] isn't supported yet. Please make sure you choose a right type", fm.mediatype[i])
-	}
-	return media, err
-}
+// 	if found {
+// 		// if len(fm.mediatype) == 1 {
+// 		// 	fm.path = fm.Media.mediaFile.mediaData
+// 		// 	if fm.mediatype[0] == "photo" {
+// 		// 		fm.Media.Photo = fm.Media.mediaFile.mediaData
+// 		// 	} else if fm.mediatype[0] == "audio" {
+// 		// 		fm.Media.Audio = fm.Media.mediaFile.mediaData
+// 		// 	} else if fm.mediatype[0] == "document" {
+// 		// 		fm.Media.Document = fm.Media.mediaFile.mediaData
+// 		// 	} else if fm.mediatype[0] == "video" {
+// 		// 		fm.Media.Video = fm.Media.mediaFile.mediaData
+// 		// 	} else if fm.mediatype[0] == "animation" {
+// 		// 		fm.Media.Animation = fm.Media.mediaFile.mediaData
+// 		// 	} else if fm.mediatype[0] == "voice" {
+// 		// 		fm.Media.Voice = fm.Media.mediaFile.mediaData
+// 		// 	} else if fm.mediatype[0] == "video-note" {
+// 		// 		fm.Media.VideoNote = fm.Media.mediaFile.mediaData
+// 		// 	}
+// 		// }
+// 	} else {
+// 		err = fmt.Errorf("the type of media [%s] isn't supported yet. Please make sure you choose a right type", fm.mediatype[i])
+// 	}
+// 	return media, err
+// }
 
-func writeToFile(file *os.File, writer *multipart.Writer, mediatype, path string) error {
+func writeToFile(file *os.File, writer *multipart.Writer, fieldname, filename string) error {
 	defer file.Close()
 
 	// // Создаем заголовки вручную
@@ -287,7 +305,7 @@ func writeToFile(file *os.File, writer *multipart.Writer, mediatype, path string
 	// 	_, err = io.Copy(part, file)
 	// }
 
-	part, err := writer.CreateFormFile(mediatype, path)
+	part, err := writer.CreateFormFile(fieldname, filename)
 	if err == nil {
 		_, err = io.Copy(part, file)
 	}
@@ -341,30 +359,47 @@ func (photo *photo) uniqueFields() (string, error) {
 	return photo.fm.writer.FormDataContentType(), err
 }
 
-func (photo *photo) uniqueInputFields(writer *multipart.Writer, numberInQueue int) error {
+func (photo *photo) uniqueInputFields(numberInQueue int) error {
+	// var part io.Writer
 	file, err := os.Open(photo.fm.Media.Group[numberInQueue].Media)
 	if err == nil {
-		err = writer.WriteField("type", "photo")
+		err = photo.fm.writer.WriteField("type", "photo")
 	}
 	if err == nil {
-		path := fmt.Sprintf("attach://%s", photo.fm.Media.Group[numberInQueue].Media)
-		err = writeToFile(file, writer, "media", path)
+		err = writeToFile(file, photo.fm.writer, photo.fm.Media.Group[numberInQueue].Media, photo.fm.Media.Group[numberInQueue].Media)
+
+		// part, err = photo.fm.writer.CreateFormFile(photo.fm.Media.Group[numberInQueue].Media, photo.fm.Media.Group[numberInQueue].Media)
 	}
+	// if err == nil {
+	// 	_, err = io.Copy(part, file)
+	// }
+
+	photo.fm.Media.Group[numberInQueue].Media = fmt.Sprintf("attach://%s", photo.fm.Media.Group[numberInQueue].Media)
+
 	if err == nil && photo.fm.Message.Text != "" {
-		err = writer.WriteField("caption", photo.fm.Message.Text)
+		photo.fm.Media.Group[numberInQueue].Caption = photo.fm.Message.Text
 	}
+
 	if err == nil && photo.fm.Message.ParseMode != "" {
-		err = writer.WriteField("parse_mode", photo.fm.Message.ParseMode)
+		photo.fm.Media.Group[numberInQueue].ParseMode = photo.fm.Message.ParseMode
 	}
+
 	if err == nil && len(photo.fm.Message.CaptionEntities) > 0 {
-		body, err1 := json.Marshal(photo.fm.Message.CaptionEntities)
-		if err1 == nil {
-			err = writer.WriteField("caption_entities", string(body))
-		}
+		// body, err1 := json.Marshal(photo.fm.Message.CaptionEntities)
+		// if err1 == nil {
+		photo.fm.Media.Group[numberInQueue].CaptionEntities = photo.fm.Message.CaptionEntities
+		// }
 	}
-	if err == nil {
-		err = photo.fm.showCapAbMediaHasSpoiler(writer)
+	if err == nil && photo.fm.Message.ProtectContent {
+		photo.fm.Media.Group[numberInQueue].HasSpoiler = true
 	}
+	if err == nil && photo.fm.Message.ShowCaptionAboveMedia {
+		photo.fm.Media.Group[numberInQueue].ShowCaptionAboveMedia = true
+	}
+
+	// if err == nil {
+	// 	err = photo.fm.showCapAbMediaHasSpoiler(photo.fm.writer)
+	// }
 	return err
 }
 
@@ -382,7 +417,7 @@ func (audio *audio) uniqueFields() (string, error) {
 	return audio.fm.writer.FormDataContentType(), err
 }
 
-func (audio *audio) uniqueInputFields(writer *multipart.Writer, numberInQueue int) error {
+func (audio *audio) uniqueInputFields(numberInQueue int) error {
 	return nil
 }
 
@@ -397,7 +432,7 @@ func (doc *document) uniqueFields() (string, error) {
 	return doc.fm.writer.FormDataContentType(), err
 }
 
-func (doc *document) uniqueInputFields(writer *multipart.Writer, numberInQueue int) error {
+func (doc *document) uniqueInputFields(numberInQueue int) error {
 	return nil
 }
 
@@ -418,7 +453,7 @@ func (video *video) uniqueFields() (string, error) {
 	return video.fm.writer.FormDataContentType(), err
 }
 
-func (video *video) uniqueInputFields(writer *multipart.Writer, numberInQueue int) error {
+func (video *video) uniqueInputFields(numberInQueue int) error {
 	return nil
 }
 
@@ -458,57 +493,57 @@ func (vn *videoNote) uniqueFields() (string, error) {
 	return vn.fm.writer.FormDataContentType(), err
 }
 
-func (fm *Formatter) commonMediaFields() error {
-	var err error
-	if fm.Business.BusinessConnectionID != "" {
-		err = fm.writer.WriteField("business_connection_id", fm.Business.BusinessConnectionID)
-	}
-	if err == nil {
-		err = fm.writer.WriteField("chat_id", fmt.Sprintf("%d", fm.Chat.ChatID))
-	}
-	if err == nil && fm.Message.ThreadID != "" {
-		err = fm.writer.WriteField("message_thread_id", fm.Message.ThreadID)
-	}
-	if err == nil && fm.Message.Text != "" && len(fm.kindofmedia) == 1 {
-		err = fm.writer.WriteField("caption", fm.Message.Text)
-	}
-	if err == nil && fm.Message.ParseMode != "" && len(fm.kindofmedia) == 1 {
-		err = fm.writer.WriteField("parse_mode", fm.Message.ParseMode)
-	}
-	if err == nil && len(fm.Message.CaptionEntities) > 0 && len(fm.kindofmedia) == 1 {
-		body, err1 := json.Marshal(fm.Message.CaptionEntities)
-		if err1 == nil {
-			err = fm.writer.WriteField("caption_entities", string(body))
-		}
-	}
-	if err == nil && fm.Char.DisableNotification {
-		err = fm.writer.WriteField("disable_notification", "True")
-	}
-	if err == nil && fm.Char.ProtectContent {
-		err = fm.writer.WriteField("protect_content", "True")
-	}
-	if err == nil && fm.Message.EffectID != "" {
-		err = fm.writer.WriteField("message_effect_id", fm.Message.EffectID)
-	}
-	if err == nil && fm.Chat.ReplyParameters.MessageID != 0 {
-		body, err1 := json.Marshal(fm.Chat.ReplyParameters)
-		if err1 == nil {
-			err = fm.writer.WriteField("reply_parameters", string(body))
-		}
-	}
-	if err == nil && fm.Message.ReplyMarkup != nil && len(fm.kindofmedia) == 1 {
-		body, err1 := json.Marshal(fm.Message.ReplyMarkup)
-		if err1 == nil {
-			err = fm.writer.WriteField("reply_markup", string(body))
-		}
-	}
-	return err
-}
+// func (fm *Formatter) commonMediaFields() error {
+// 	var err error
+// 	if fm.Business.BusinessConnectionID != "" {
+// 		err = fm.writer.WriteField("business_connection_id", fm.Business.BusinessConnectionID)
+// 	}
+// 	if err == nil {
+// 		err = fm.writer.WriteField("chat_id", fmt.Sprintf("%d", fm.Chat.ChatID))
+// 	}
+// 	if err == nil && fm.Message.ThreadID != "" {
+// 		err = fm.writer.WriteField("message_thread_id", fm.Message.ThreadID)
+// 	}
+// 	if err == nil && fm.Message.Text != "" && len(fm.kindofmedia) == 1 {
+// 		err = fm.writer.WriteField("caption", fm.Message.Text)
+// 	}
+// 	if err == nil && fm.Message.ParseMode != "" && len(fm.kindofmedia) == 1 {
+// 		err = fm.writer.WriteField("parse_mode", fm.Message.ParseMode)
+// 	}
+// 	if err == nil && len(fm.Message.CaptionEntities) > 0 && len(fm.kindofmedia) == 1 {
+// 		body, err1 := json.Marshal(fm.Message.CaptionEntities)
+// 		if err1 == nil {
+// 			err = fm.writer.WriteField("caption_entities", string(body))
+// 		}
+// 	}
+// 	if err == nil && fm.Char.DisableNotification {
+// 		err = fm.writer.WriteField("disable_notification", "True")
+// 	}
+// 	if err == nil && fm.Char.ProtectContent {
+// 		err = fm.writer.WriteField("protect_content", "True")
+// 	}
+// 	if err == nil && fm.Message.EffectID != "" {
+// 		err = fm.writer.WriteField("message_effect_id", fm.Message.EffectID)
+// 	}
+// 	if err == nil && fm.Chat.ReplyParameters.MessageID != 0 {
+// 		body, err1 := json.Marshal(fm.Chat.ReplyParameters)
+// 		if err1 == nil {
+// 			err = fm.writer.WriteField("reply_parameters", string(body))
+// 		}
+// 	}
+// 	if err == nil && fm.Message.ReplyMarkup != nil && len(fm.kindofmedia) == 1 {
+// 		body, err1 := json.Marshal(fm.Message.ReplyMarkup)
+// 		if err1 == nil {
+// 			err = fm.writer.WriteField("reply_markup", string(body))
+// 		}
+// 	}
+// 	return err
+// }
 
-func (fm *Formatter) commonInputMediaFields(buf *bytes.Buffer) error {
+func (fm *Formatter) commonInputMediaFields() error {
 	var (
-		err  error
-		part io.Writer
+		err       error
+		mediaJSON []byte
 	)
 	if fm.Business.BusinessConnectionID != "" {
 		err = fm.writer.WriteField("business_connection_id", fm.Business.BusinessConnectionID)
@@ -520,11 +555,10 @@ func (fm *Formatter) commonInputMediaFields(buf *bytes.Buffer) error {
 		err = fm.writer.WriteField("message_thread_id", fm.Message.ThreadID)
 	}
 	if err == nil {
-		part, err = fm.writer.CreateFormField("media")
+		mediaJSON, err = json.Marshal(fm.Media.Group)
 	}
 	if err == nil {
-		// log.Print(part)
-		_, err = io.Copy(part, buf)
+		err = fm.writer.WriteField("media", string(mediaJSON))
 	}
 	return err
 }
@@ -532,23 +566,18 @@ func (fm *Formatter) commonInputMediaFields(buf *bytes.Buffer) error {
 func (fm *Formatter) fromStorageMedia(buf *bytes.Buffer) (string, string, error) {
 	fm.file = new(os.File)
 	fm.writer = multipart.NewWriter(buf)
-	media, err := fm.checkMediaType()
+	method, err := fm.mediaStorage[0].CreateFields(fm.writer)
 	if err == nil {
-		fm.file, err = os.Open(fm.path)
+		err = fm.m.MultipartFiellds(fm.writer)
 	}
 	if err == nil {
-		fm.contenttype, err = media[0].data.uniqueFields()
+		err = fm.writer.Close()
 	}
-	if err == nil {
-		err = fm.commonMediaFields()
-	}
-	if err == nil {
-		defer fm.writer.Close()
-	}
-	return media[0].method, fm.writer.FormDataContentType(), err
+	log.Print(buf.String())
+	return method, fm.writer.FormDataContentType(), err
 }
 
-func (fm *Formatter) makeMediaRequest(buf *bytes.Buffer) {
+func (fm *Formatter) makeMediaRequest(buf *bytes.Buffer) error {
 	var (
 		messageByte, chatByte, mediaByte, businessByte, charByte, finalbody []byte
 		err                                                                 error
@@ -594,62 +623,62 @@ func (fm *Formatter) makeMediaRequest(buf *bytes.Buffer) {
 		}
 		log.Print(string(finalbody))
 	}
-}
-
-func (fm *Formatter) tgOrURLMedia(buf *bytes.Buffer) (string, string, error) {
-	media, err := fm.checkMediaType()
-	if err == nil {
-		fm.makeMediaRequest(buf)
-	}
-	return media[0].method, "application/json", err
-}
-
-func (fm *Formatter) inputMedia(mediawriter *multipart.Writer, fields handleInputMedia, numberInQueue int) error {
-	err := fields.uniqueInputFields(mediawriter, numberInQueue)
 	return err
 }
 
-func (fm *Formatter) mediaGroup(buf *bytes.Buffer) (string, string, error) {
-	var (
-		found       bool
-		err         error
-		contenttype string // just or testing. For other functions I have fm.contenttype
-		media       []handleInputMedia
-	)
-
-	for i := 0; i < len(fm.kindofmedia) && !found; i++ {
-		if fm.kindofmedia[i] == fromStorage {
-			found = true
-		}
-	}
-
-	if !found {
-		_, err := fm.checkInputMediaType()
-		if err == nil {
-			fm.makeMediaRequest(buf)
-			contenttype = "application/json"
-		}
-	} else {
-		fm.writer = multipart.NewWriter(buf)
-		media, err = fm.checkInputMediaType()
-		inputbuf := bytes.NewBuffer(nil)
-		mediawriter := multipart.NewWriter(inputbuf)
-		for i := 0; i < len(media) && err == nil; i++ {
-			err = fm.inputMedia(mediawriter, media[i], i)
-		}
-		if err == nil {
-			err = mediawriter.Close()
-		}
-		if err == nil {
-			err = fm.commonInputMediaFields(inputbuf)
-		}
-		if err == nil {
-			err = fm.writer.Close()
-		}
-		if err == nil {
-			contenttype = fm.writer.FormDataContentType()
-		}
-	}
-	log.Print(buf.String())
-	return mediaGroup, contenttype, err
+func (fm *Formatter) tgOrURLMedia(buf *bytes.Buffer) (string, string, error) {
+	// media, err := fm.checkMediaType()
+	// if err == nil {
+	method, _ := fm.mediaStorage[0].CreateFields(nil)
+	err := fm.makeMediaRequest(buf)
+	// }
+	return method, "application/json", err
 }
+
+func (fm *Formatter) inputMedia(fields handleInputMedia, numberInQueue int) error {
+	err := fields.uniqueInputFields(numberInQueue)
+	return err
+}
+
+// func (fm *Formatter) mediaGroup(buf *bytes.Buffer) (string, string, error) {
+// 	var (
+// 		found       bool
+// 		err         error
+// 		contenttype string // just or testing. For other functions I have fm.contenttype
+// 		media       []handleInputMedia
+// 	)
+
+// 	for i := 0; i < len(fm.kindofmedia) && !found; i++ {
+// 		if fm.kindofmedia[i] == fromStorage {
+// 			found = true
+// 		}
+// 	}
+
+// 	if !found {
+// 		_, err := fm.checkInputMediaType()
+// 		if err == nil {
+// 			fm.makeMediaRequest(buf)
+// 			contenttype = "application/json"
+// 		}
+// 	} else {
+// 		fm.writer = multipart.NewWriter(buf)
+
+// 		media, err = fm.checkInputMediaType()
+
+// 		for i := 0; i < len(media) && err == nil; i++ {
+// 			err = fm.inputMedia(media[i], i)
+// 		}
+
+// 		if err == nil {
+// 			err = fm.commonInputMediaFields()
+// 		}
+// 		if err == nil {
+// 			err = fm.writer.Close()
+// 		}
+// 		if err == nil {
+// 			contenttype = fm.writer.FormDataContentType()
+// 		}
+// 	}
+// 	log.Print(buf.String())
+// 	return mediaGroup, contenttype, err
+// }

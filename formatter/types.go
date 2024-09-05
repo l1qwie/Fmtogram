@@ -4,6 +4,8 @@ import (
 	"mime/multipart"
 	"os"
 
+	"github.com/l1qwie/Fmtogram/formatter/media"
+	"github.com/l1qwie/Fmtogram/formatter/message"
 	"github.com/l1qwie/Fmtogram/types"
 )
 
@@ -26,8 +28,13 @@ type InputMediaPhoto struct {
 }
 
 type InputMedia struct {
-	Type  string `json:"type"`
-	Media string `json:"media"`
+	Caption               string                `json:"caption,omitempty"`
+	Type                  string                `json:"type,omitempty"`
+	Media                 string                `json:"media,omitempty"`
+	ParseMode             string                `json:"parse_mode,omitempty"`
+	ShowCaptionAboveMedia bool                  `json:"show_caption_above_media,omitempty"`
+	HasSpoiler            bool                  `json:"has_spoiler,omitempty"`
+	CaptionEntities       []types.MessageEntity `json:"caption_entities,omitempty"`
 }
 
 type btnKind int
@@ -91,7 +98,7 @@ type videoNote struct {
 	fm *Formatter
 }
 
-type message struct {
+type message2 struct {
 	Text                  string                `json:"text,omitempty"`
 	Caption               string                `json:"caption,omitempty"`
 	MessageID             interface{}           `json:"message_id,omitempty"`
@@ -119,7 +126,7 @@ type mediaStorage struct {
 	mediaData string
 }
 
-type media struct {
+type media2 struct {
 	Group              []InputMedia `json:"media,omitempty"`
 	Photo              string       `json:"photo,omitempty"`
 	Audio              string       `json:"audio,omitempty"`
@@ -151,20 +158,22 @@ type characteristics struct {
 }
 
 type Formatter struct {
-	Message  message
+	Message  message2
 	Business business
 	User     user
 	Chat     chat
-	Media    media
+	Media    media2
 	Char     characteristics
+	m        *message.Message
 	// Photo    media
 	// Message        SendMessage
 	// Keyboard    InlineKeyboard
 	// Err         error
 	contenttype string
-	kindofmedia []int
-	mediatype   []string
-	file        *os.File
-	writer      *multipart.Writer
-	path        string
+	// kindofmedia  []int
+	// mediatype    []string
+	file         *os.File
+	writer       *multipart.Writer
+	path         string
+	mediaStorage []media.HandleMedia
 }

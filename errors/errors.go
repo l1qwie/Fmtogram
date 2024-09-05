@@ -53,3 +53,27 @@ func MessageIDIsNil() {
 func RequestError(err error) {
 	log.Printf("[ERROR] You have an error while trying to send a request to Telegram: %s", err)
 }
+
+func CantOpenFile(err error) {
+	log.Printf("[ERROR] Fmtogram couldn't open the file to send after: %s", err)
+}
+
+func CantCopyFile(err error) {
+	log.Printf("[ERROR] Fmtgoram couldn't copy a part to the file: %s", err)
+}
+
+func CantCreateFormFile(err error) {
+	log.Printf("[ERROR] Fmtogram couldn't create a Form File: %s", err)
+}
+
+func CantWriteField(err error) {
+	log.Printf("[ERROR] Fmtogram couldn't write a multipart field: %s", err)
+}
+
+func CantMarshalJSON(err error) {
+	log.Printf("[ERROR] Fmtogram couldn't marshal a json object: %s", err)
+}
+
+func ChatIDIsMissed() error {
+	return fmt.Errorf("[ERROR] You must provide chatID")
+}

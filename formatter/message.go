@@ -21,9 +21,13 @@ func (fm *Formatter) WriteParseMode(mode string) {
 	logs.DataWrittenSuccessfully("Parse Mode")
 }
 
-func (fm *Formatter) IsProtectedContent() {
+func (fm *Formatter) ProtectAllContent() {
 	fm.Message.ProtectContent = true
 	logs.DataWrittenSuccessfully("Protected Content")
+}
+
+func (fm *Formatter) ProtectMedia(numberOfMedia int) {
+
 }
 
 func (fm *Formatter) AddCaptionEntities(entities []types.MessageEntity) {

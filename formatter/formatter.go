@@ -103,14 +103,15 @@ func (fm *Formatter) MediaPreparing() (*bytes.Buffer, string, string, error) {
 		method, contenttype string
 	)
 	buf := bytes.NewBuffer(nil)
-	if len(fm.kindofmedia) == 1 {
-		if fm.kindofmedia[0] == fromStorage {
-			method, contenttype, err = fm.fromStorageMedia(buf)
-		} else {
-			method, contenttype, err = fm.tgOrURLMedia(buf)
-		}
+	if len(fm.mediaStorage) == 1 {
+		method, contenttype, err = fm.fromStorageMedia(buf)
+		// if fm.kindofmedia[0] == fromStorage {
+		// 	method, contenttype, err = fm.fromStorageMedia(buf)
+		// } else {
+		// 	method, contenttype, err = fm.tgOrURLMedia(buf)
+		// }
 	} else {
-		method, contenttype, err = fm.mediaGroup(buf)
+		// method, contenttype, err = fm.mediaGroup(buf)
 	}
 	return buf, method, contenttype, err
 }

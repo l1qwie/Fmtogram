@@ -208,9 +208,9 @@ type InputPaidMediaPhoto struct {
 }
 
 type InputPaidMediaVideo struct {
-	Type              string `json:"type"`
-	Media             string `json:"media"`
-	thumbpath         string
+	Type  string `json:"type"`
+	Media string `json:"media"`
+	// thumbpath         string
 	Thumbnail         string `json:"thumbnail,omitempty"` // InputFile or String
 	Width             int    `json:"width,omitempty"`
 	Height            int    `json:"height,omitempty"`
