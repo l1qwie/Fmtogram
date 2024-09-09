@@ -175,5 +175,6 @@ type Formatter struct {
 	file         *os.File
 	writer       *multipart.Writer
 	path         string
-	mediaStorage []media.HandleMedia
+	mediaStorage []media.Handler
+	evenone      bool
 }

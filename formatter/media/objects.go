@@ -6,16 +6,20 @@ import (
 	"github.com/l1qwie/Fmtogram/types"
 )
 
-type HandleMedia interface {
-	CreateFields(*multipart.Writer) (string, error)
+type Handler interface {
+	CreateFields(*multipart.Writer, []interface{}, int, bool) (string, error)
 }
 
 type Photo struct {
-	Type                  string                 `json:"type,omitempty"`
-	Media                 string                 `json:"media,omitempty"`
-	Photo                 string                 `json:"photo,omitempty"`
-	Caption               string                 `json:"caption,omitempty"`
-	ParseMode             string                 `json:"parse_mode,omitempty"`
+	Type  string `json:"type,omitempty"`
+	Media string `json:"media,omitempty"`
+	Photo string `json:"photo,omitempty"`
+
+	// It's going to work only if you want to send more than 1 photo. Overwise use message object
+	Caption string `json:"caption,omitempty"`
+	// It's going to work only if you want to send more than 1 photo. Overwise use message object
+	ParseMode string `json:"parse_mode,omitempty"`
+
 	CaptionEntities       []*types.MessageEntity `json:"caption_entities,omitempty"`
 	ShowCaptionAboveMedia bool                   `json:"show_caption_above_media,omitempty"`
 	HasSpoiler            bool                   `json:"has_spoiler,omitempty"`
@@ -23,12 +27,16 @@ type Photo struct {
 }
 
 type Video struct {
-	Type                  string                 `json:"type,omitempty"`
-	Media                 string                 `json:"media,omitempty"`
-	Video                 string                 `json:"video,omitempty"`
-	Thumbnail             string                 `json:"thumbnail,omitempty"`
-	Caption               string                 `json:"caption,omitempty"`
-	ParseMode             string                 `json:"parse_mode,omitempty"`
+	Type      string `json:"type,omitempty"`
+	Media     string `json:"media,omitempty"`
+	Video     string `json:"video,omitempty"`
+	Thumbnail string `json:"thumbnail,omitempty"`
+
+	// It's going to work only if you want to send more than 1 video. Overwise use message object
+	Caption string `json:"caption,omitempty"`
+	// It's going to work only if you want to send more than 1 video. Overwise use message object
+	ParseMode string `json:"parse_mode,omitempty"`
+
 	CaptionEntities       []*types.MessageEntity `json:"caption_entities,omitempty"`
 	ShowCaptionAboveMedia bool                   `json:"show_caption_above_media,omitempty"`
 	Width                 int                    `json:"width,omitempty"`
@@ -41,12 +49,16 @@ type Video struct {
 }
 
 type Audio struct {
-	Type                string                 `json:"type,omitempty"`
-	Media               string                 `json:"media,omitempty"`
-	Audio               string                 `json:"audio,omitempty"`
-	Thumbnail           string                 `json:"thumbnail,omitempty"`
-	Caption             string                 `json:"caption,omitempty"`
-	ParseMode           string                 `json:"parse_mode,omitempty"`
+	Type      string `json:"type,omitempty"`
+	Media     string `json:"media,omitempty"`
+	Audio     string `json:"audio,omitempty"`
+	Thumbnail string `json:"thumbnail,omitempty"`
+
+	// It's going to work only if you want to send more than 1 audio. Overwise use message object
+	Caption string `json:"caption,omitempty"`
+	// It's going to work only if you want to send more than 1 audio. Overwise use message object
+	ParseMode string `json:"parse_mode,omitempty"`
+
 	CaptionEntities     []*types.MessageEntity `json:"caption_entities,omitempty"`
 	Duration            int                    `json:"duration,omitempty"`
 	Performer           string                 `json:"performer,omitempty"`
@@ -56,14 +68,22 @@ type Audio struct {
 }
 
 type Document struct {
-	Type                        string                 `json:"type,omitempty"`
-	Media                       string                 `json:"media,omitempty"`
-	Document                    string                 `json:"document,omitempty"`
-	Thumbnail                   string                 `json:"thumbnail,omitempty"`
-	Caption                     string                 `json:"caption,omitempty"`
-	ParseMode                   string                 `json:"parse_mode,omitempty"`
+	Type      string `json:"type,omitempty"`
+	Media     string `json:"media,omitempty"`
+	Document  string `json:"document,omitempty"`
+	Thumbnail string `json:"thumbnail,omitempty"`
+
+	// It's going to work only if you want to send more than 1 document. Overwise use message object
+	Caption string `json:"caption,omitempty"`
+	// It's going to work only if you want to send more than 1 document. Overwise use message object
+	ParseMode string `json:"parse_mode,omitempty"`
+
 	CaptionEntities             []*types.MessageEntity `json:"caption_entities,omitempty"`
 	DisableContentTypeDetection bool                   `json:"disable_content_type_detection,omitempty"`
 	DocumentGottenFrom          int
 	ThumbnailGottenFrom         int
+}
+
+type MediaArray struct {
+	Media []interface{} `json:"media,omitempty"`
 }

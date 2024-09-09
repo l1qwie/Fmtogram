@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/l1qwie/Fmtogram/formatter/media"
+	"github.com/l1qwie/Fmtogram/formatter/methods"
 	"github.com/l1qwie/Fmtogram/logs"
 )
 
@@ -33,7 +34,7 @@ type handleInputMedia interface {
 }
 
 type settings struct {
-	data   media.HandleMedia
+	data   media.Handler
 	method string
 }
 
@@ -43,90 +44,94 @@ type mediaFields struct {
 }
 
 func (fm *Formatter) AddPhotoFromStorage(path string) *media.Photo {
-	photo := &media.Photo{Photo: path, GottenFrom: media.Storage}
+	fm.evenone = true
+	photo := &media.Photo{Type: "photo", Photo: path, GottenFrom: media.Storage}
 	fm.mediaStorage = append(fm.mediaStorage, photo)
 	logs.NewObjectCreated("Photo")
 	return photo
 }
 
 func (fm *Formatter) AddPhotoFromTG(photoID string) *media.Photo {
-	photo := &media.Photo{Photo: photoID, GottenFrom: media.Telegram}
+	photo := &media.Photo{Type: "photo", Photo: photoID, GottenFrom: media.Telegram}
 	fm.mediaStorage = append(fm.mediaStorage, photo)
 	logs.NewObjectCreated("Photo")
 	return photo
 }
 
 func (fm *Formatter) AddPhotoFromInternet(URL string) *media.Photo {
-	photo := &media.Photo{Photo: URL, GottenFrom: media.Internet}
+	photo := &media.Photo{Type: "photo", Photo: URL, GottenFrom: media.Internet}
 	fm.mediaStorage = append(fm.mediaStorage, photo)
 	logs.NewObjectCreated("Photo")
 	return photo
 }
 
 func (fm *Formatter) AddAudioFromStorage(path string) *media.Audio {
-	audio := &media.Audio{Audio: path, AudioGottenFrom: media.Storage}
+	fm.evenone = true
+	audio := &media.Audio{Type: "audio", Audio: path, AudioGottenFrom: media.Storage}
 	fm.mediaStorage = append(fm.mediaStorage, audio)
 	logs.NewObjectCreated("Audio")
 	return audio
 }
 
 func (fm *Formatter) AddAudioFromTG(audioID string) *media.Audio {
-	audio := &media.Audio{Audio: audioID, AudioGottenFrom: media.Telegram}
+	audio := &media.Audio{Type: "audio", Audio: audioID, AudioGottenFrom: media.Telegram}
 	fm.mediaStorage = append(fm.mediaStorage, audio)
 	logs.NewObjectCreated("Audio")
 	return audio
 }
 
 func (fm *Formatter) AddAudioFromInternet(URL string) *media.Audio {
-	audio := &media.Audio{Audio: URL, AudioGottenFrom: media.Internet}
+	audio := &media.Audio{Type: "audio", Audio: URL, AudioGottenFrom: media.Internet}
 	fm.mediaStorage = append(fm.mediaStorage, audio)
 	logs.NewObjectCreated("Audio")
 	return audio
 }
 
 func (fm *Formatter) AddDocumentFromStorage(path string) *media.Document {
-	document := &media.Document{Document: path, DocumentGottenFrom: media.Storage}
+	fm.evenone = true
+	document := &media.Document{Type: "document", Document: path, DocumentGottenFrom: media.Storage}
 	fm.mediaStorage = append(fm.mediaStorage, document)
 	logs.NewObjectCreated("Document")
 	return document
 }
 
 func (fm *Formatter) AddDocumentFromTG(documentID string) *media.Document {
-	document := &media.Document{Document: documentID, DocumentGottenFrom: media.Telegram}
+	document := &media.Document{Type: "document", Document: documentID, DocumentGottenFrom: media.Telegram}
 	fm.mediaStorage = append(fm.mediaStorage, document)
 	logs.NewObjectCreated("Document")
 	return document
 }
 
 func (fm *Formatter) AddDocumentFromInternet(URL string) *media.Document {
-	document := &media.Document{Document: URL, DocumentGottenFrom: media.Internet}
+	document := &media.Document{Type: "document", Document: URL, DocumentGottenFrom: media.Internet}
 	fm.mediaStorage = append(fm.mediaStorage, document)
 	logs.NewObjectCreated("Document")
 	return document
 }
 
 func (fm *Formatter) AddVideoFromStorage(path string) *media.Video {
-	video := &media.Video{Video: path, VideoGottenFrom: media.Storage}
+	fm.evenone = true
+	video := &media.Video{Type: "video", Video: path, VideoGottenFrom: media.Storage}
 	fm.mediaStorage = append(fm.mediaStorage, video)
 	logs.NewObjectCreated("Video")
 	return video
 }
 
 func (fm *Formatter) AddVideoFromTG(videoID string) *media.Video {
-	video := &media.Video{Video: videoID, VideoGottenFrom: media.Telegram}
+	video := &media.Video{Type: "video", Video: videoID, VideoGottenFrom: media.Telegram}
 	fm.mediaStorage = append(fm.mediaStorage, video)
 	logs.NewObjectCreated("Video")
 	return video
 }
 
 func (fm *Formatter) AddVideoFromInternet(URL string) *media.Video {
-	video := &media.Video{Video: URL, VideoGottenFrom: media.Internet}
+	video := &media.Video{Type: "video", Video: URL, VideoGottenFrom: media.Internet}
 	fm.mediaStorage = append(fm.mediaStorage, video)
 	logs.NewObjectCreated("Video")
 	return video
 }
 
-// func (fm *Formatter) AddAnimationAnimationFromStorage(path string) {
+// func (fm *Formatter) AddAnimationAnimation`FromStorage`(path string) {
 // 	fm.whereToAdd(path, "animation", fromStorage)
 // 	logs.DataWrittenSuccessfully("An Animation From The Storage")
 // }
@@ -566,9 +571,9 @@ func (fm *Formatter) commonInputMediaFields() error {
 func (fm *Formatter) fromStorageMedia(buf *bytes.Buffer) (string, string, error) {
 	fm.file = new(os.File)
 	fm.writer = multipart.NewWriter(buf)
-	method, err := fm.mediaStorage[0].CreateFields(fm.writer)
+	method, err := fm.mediaStorage[0].CreateFields(fm.writer, nil, 0, false)
 	if err == nil {
-		err = fm.m.MultipartFiellds(fm.writer)
+		err = fm.m.MultipartFields(fm.writer, method)
 	}
 	if err == nil {
 		err = fm.writer.Close()
@@ -626,18 +631,46 @@ func (fm *Formatter) makeMediaRequest(buf *bytes.Buffer) error {
 	return err
 }
 
-func (fm *Formatter) tgOrURLMedia(buf *bytes.Buffer) (string, string, error) {
-	// media, err := fm.checkMediaType()
-	// if err == nil {
-	method, _ := fm.mediaStorage[0].CreateFields(nil)
-	err := fm.makeMediaRequest(buf)
-	// }
-	return method, "application/json", err
-}
+//	func (fm *Formatter) tgOrURLMedia(buf *bytes.Buffer) (string, string, error) {
+//		// media, err := fm.checkMediaType()
+//		// if err == nil {
+//		method, _ := fm.mediaStorage[0].CreateFields(nil)
+//		err := fm.makeMediaRequest(buf)
+//		// }
+//		return method, "application/json", err
+//	}
 
 func (fm *Formatter) inputMedia(fields handleInputMedia, numberInQueue int) error {
 	err := fields.uniqueInputFields(numberInQueue)
 	return err
+}
+
+func (fm *Formatter) mediaGroup(buf *bytes.Buffer) (string, string, error) {
+	var (
+		contenttype string
+		err         error
+	)
+	if !fm.evenone {
+		fm.makeMediaRequest(buf)
+		contenttype = "application/json"
+	} else {
+		fm.writer = multipart.NewWriter(buf)
+		group := make([]interface{}, len(fm.mediaStorage))
+		for i := 0; i < len(fm.mediaStorage) && err == nil; i++ {
+			_, err = fm.mediaStorage[i].CreateFields(fm.writer, group, i, true)
+		}
+		if err == nil {
+			err = media.Group(fm.writer, group)
+		}
+		if err == nil {
+			err = fm.m.MultipartFields(fm.writer, methods.MediaGroup)
+		}
+		if err == nil {
+			err = fm.writer.Close()
+		}
+		contenttype = fm.writer.FormDataContentType()
+	}
+	return methods.MediaGroup, contenttype, err
 }
 
 // func (fm *Formatter) mediaGroup(buf *bytes.Buffer) (string, string, error) {

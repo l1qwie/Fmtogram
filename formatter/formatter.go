@@ -111,7 +111,7 @@ func (fm *Formatter) MediaPreparing() (*bytes.Buffer, string, string, error) {
 		// 	method, contenttype, err = fm.tgOrURLMedia(buf)
 		// }
 	} else {
-		// method, contenttype, err = fm.mediaGroup(buf)
+		method, contenttype, err = fm.mediaGroup(buf)
 	}
 	return buf, method, contenttype, err
 }

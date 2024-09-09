@@ -3,6 +3,9 @@ package message
 import "github.com/l1qwie/Fmtogram/types"
 
 type Message struct {
+	Text                 string                 `json:"text,omitempty"`
+	Caption              string                 `json:"caption,omitempty"`
+	ParseMode            string                 `json:"parse_mode,omitempty"`
 	ChatID               interface{}            `json:"chat_id,omitempty"`
 	BusinessConnectionID string                 `json:"business_connection_id,omitempty"`
 	MessageThreadID      int                    `json:"message_thread_id,omitempty"`

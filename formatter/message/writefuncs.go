@@ -8,22 +8,32 @@ import (
 
 func (m *Message) WriteChatID(chatID int) {
 	m.ChatID = chatID
-	logs.DataWrittenSuccessfully("Chat ID")
+	logs.DataWrittenSuccessfully("{Message} Chat ID")
 }
 
 func (m *Message) WriteChatName(chatname string) {
 	m.ChatID = fmt.Sprint("@", chatname)
-	logs.DataWrittenSuccessfully("Chat Name")
+	logs.DataWrittenSuccessfully("{Message} Chat Name")
 }
 
 func (m *Message) WriteChatURL(chatURL string) {
 	m.ChatID = chatURL
-	logs.DataWrittenSuccessfully("Chat URL")
+	logs.DataWrittenSuccessfully("{Message} Chat URL")
 }
 
 func (m *Message) WriteBusinessConnectionID(connectionID string) {
 	m.BusinessConnectionID = connectionID
-	logs.DataWrittenSuccessfully("Business Connection ID")
+	logs.DataWrittenSuccessfully("{Message} Business Connection ID")
+}
+
+func (m *Message) WriteString(text string) {
+	m.Text = text
+	logs.DataWrittenSuccessfully("{Message} Text")
+}
+
+func (m *Message) WriteParseMode(parsemode string) {
+	m.ParseMode = parsemode
+	logs.DataWrittenSuccessfully("{Message} Parse Mode")
 }
 
 // func (m *Message) WriteThreadID(threadID string) {

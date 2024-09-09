@@ -4,25 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"os"
 
 	"github.com/l1qwie/Fmtogram/errors"
+	"github.com/l1qwie/Fmtogram/formatter/methods"
 	"github.com/l1qwie/Fmtogram/types"
 )
 
 const (
-	Storage          int    = 1
-	Telegram         int    = 2
-	Internet         int    = 3
-	photoMethod      string = "sendPhoto"
-	audioMethod      string = "sendAudio"
-	documentMethod   string = "sendDocument"
-	videoMethod      string = "sendVideo"
-	animationMethod  string = "sendAnimation"
-	voiceMethod      string = "sendVoice"
-	videoNoteMethod  string = "sendVideoNote"
-	mediaGroupMethod string = "sendMediaGroup"
+	Storage  int = 1
+	Telegram int = 2
+	Internet int = 3
 )
 
 func writeFileToMultipart(writer *multipart.Writer, fieldname, filename string) error {
@@ -62,22 +56,24 @@ func addThumbnail(writer *multipart.Writer, thumbnail string, gottenfrom int) er
 }
 
 func commonFields(writer *multipart.Writer, caption, parsemode string, captionEntities []*types.MessageEntity) error {
-	var err error
-	if caption != "" {
-		err = writer.WriteField("caption", caption)
+	var (
+		err error
+	)
+	// if caption != "" {
+	// 	err = writer.WriteField("caption", caption)
 
-		if err != nil {
-			errors.CantWriteField(err)
-		}
-	}
-	if err == nil && parsemode != "" {
-		err = writer.WriteField("parse_mode", parsemode)
+	// 	if err != nil {
+	// 		errors.CantWriteField(err)
+	// 	}
+	// }
+	// if err == nil && parsemode != "" {
+	// 	err = writer.WriteField("parse_mode", parsemode)
 
-		if err != nil {
-			errors.CantWriteField(err)
-		}
-	}
-	if err == nil && len(captionEntities) != 0 {
+	// 	if err != nil {
+	// 		errors.CantWriteField(err)
+	// 	}
+	// }
+	if len(captionEntities) != 0 {
 		body, err1 := json.Marshal(captionEntities)
 		if err1 == nil {
 			err = writer.WriteField("caption_entities", string(body))
@@ -93,10 +89,18 @@ func commonFields(writer *multipart.Writer, caption, parsemode string, captionEn
 	return err
 }
 
-func (ph *Photo) CreateFields(writer *multipart.Writer) (string, error) {
+func (ph *Photo) CreateFields(writer *multipart.Writer, group []interface{}, i int, input bool) (string, error) {
 	err := commonFields(writer, ph.Caption, ph.ParseMode, ph.CaptionEntities)
 	if err == nil {
-		err = writeFileToMultipart(writer, "photo", ph.Photo)
+		if input {
+			err = writeFileToMultipart(writer, ph.Photo, ph.Photo)
+			ph.Media = fmt.Sprintf("attach://%s", ph.Photo)
+		} else {
+			err = writeFileToMultipart(writer, "photo", ph.Photo)
+		}
+	}
+	if err == nil && input {
+		err = writer.WriteField("type", "photo")
 	}
 	if err == nil && ph.ShowCaptionAboveMedia {
 		err = writer.WriteField("show_caption_above_media", "True")
@@ -112,13 +116,24 @@ func (ph *Photo) CreateFields(writer *multipart.Writer) (string, error) {
 			errors.CantWriteField(err)
 		}
 	}
-	return photoMethod, err
+	if group != nil {
+		group[i] = ph
+	}
+	return methods.Photo, err
 }
 
-func (vd *Video) CreateFields(writer *multipart.Writer) (string, error) {
+func (vd *Video) CreateFields(writer *multipart.Writer, group []interface{}, i int, input bool) (string, error) {
 	err := commonFields(writer, vd.Caption, vd.ParseMode, vd.CaptionEntities)
 	if err == nil {
-		err = writeFileToMultipart(writer, "video", vd.Video)
+		if input {
+			err = writeFileToMultipart(writer, vd.Video, vd.Video)
+			vd.Media = fmt.Sprintf("attach://%s", vd.Video)
+		} else {
+			err = writeFileToMultipart(writer, "video", vd.Video)
+		}
+	}
+	if err == nil && input {
+		err = writer.WriteField("type", "video")
 	}
 	if err == nil && vd.Duration != 0 {
 		err = writer.WriteField("duration", fmt.Sprintf("%d", vd.Duration))
@@ -161,13 +176,24 @@ func (vd *Video) CreateFields(writer *multipart.Writer) (string, error) {
 	if err == nil && vd.SupportsStreaming {
 		err = writer.WriteField("supports_streaming", "True")
 	}
-	return videoMethod, err
+	if group != nil {
+		group[i] = vd
+	}
+	return methods.Video, err
 }
 
-func (ad *Audio) CreateFields(writer *multipart.Writer) (string, error) {
+func (ad *Audio) CreateFields(writer *multipart.Writer, group []interface{}, i int, input bool) (string, error) {
 	err := commonFields(writer, ad.Caption, ad.ParseMode, ad.CaptionEntities)
 	if err == nil {
-		err = writeFileToMultipart(writer, "audio", ad.Audio)
+		if input {
+			err = writeFileToMultipart(writer, ad.Audio, ad.Audio)
+			ad.Media = fmt.Sprintf("attach://%s", ad.Audio)
+		} else {
+			err = writeFileToMultipart(writer, "audio", ad.Audio)
+		}
+	}
+	if err == nil && input {
+		err = writer.WriteField("type", "audio")
 	}
 	if err == nil && ad.Duration != 0 {
 		err = writer.WriteField("duration", fmt.Sprintf("%d", ad.Duration))
@@ -186,13 +212,24 @@ func (ad *Audio) CreateFields(writer *multipart.Writer) (string, error) {
 	if err == nil && ad.Thumbnail != "" {
 		err = addThumbnail(writer, ad.Thumbnail, ad.ThumbnailGottenFrom)
 	}
-	return audioMethod, err
+	if group != nil {
+		group[i] = ad
+	}
+	return methods.Audio, err
 }
 
-func (dc *Document) CreateFields(writer *multipart.Writer) (string, error) {
+func (dc *Document) CreateFields(writer *multipart.Writer, group []interface{}, i int, input bool) (string, error) {
 	err := commonFields(writer, dc.Caption, dc.ParseMode, dc.CaptionEntities)
 	if err == nil {
-		err = writeFileToMultipart(writer, "document", dc.Document)
+		if input {
+			err = writeFileToMultipart(writer, dc.Document, dc.Document)
+			dc.Media = fmt.Sprintf("attach://%s", dc.Document)
+		} else {
+			err = writeFileToMultipart(writer, "document", dc.Document)
+		}
+	}
+	if err == nil && input {
+		err = writer.WriteField("type", "document")
 	}
 	if err == nil && dc.Thumbnail != "" {
 		err = addThumbnail(writer, dc.Thumbnail, dc.ThumbnailGottenFrom)
@@ -204,5 +241,28 @@ func (dc *Document) CreateFields(writer *multipart.Writer) (string, error) {
 			errors.CantWriteField(err)
 		}
 	}
-	return documentMethod, err
+	if group != nil {
+		group[i] = dc
+	}
+	return methods.Document, err
+}
+
+func CreateJSON(media interface{}) ([]byte, error) {
+	body, err := json.Marshal(media)
+	if err == nil {
+
+	} else {
+		errors.CantMarshalJSON(err)
+	}
+	return body, err
+}
+
+func Group(writer *multipart.Writer, group []interface{}) error {
+	log.Print(group)
+	mediaJSON, err := json.Marshal(group)
+	if err == nil && len(mediaJSON) != 0 {
+		err = writer.WriteField("media", string(mediaJSON))
+	}
+	log.Print(string(mediaJSON))
+	return err
 }
