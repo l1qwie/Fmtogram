@@ -1,9 +1,10 @@
 package types
 
 var (
-	BotID string
-	DEBUG bool
-	INFO  bool
+	BotID             string
+	DEBUG             bool
+	INFO              bool
+	NoWarningMessages bool
 	// StartFunc func(*Telegram, *Returned) *formatter.Formatter
 )
 

@@ -35,10 +35,7 @@ func (m *Message) captionText(method string) {
 func (m *Message) MultipartFields(writer *multipart.Writer, method string) error {
 	var err error
 	m.captionText(method)
-	if m.BusinessConnectionID != "" {
-		err = field(writer, "business_connection_id", m.BusinessConnectionID)
-	}
-	if err == nil && m.Text != "" {
+	if m.Text != "" {
 		err = field(writer, "text", m.Text)
 	}
 	if err == nil && m.Caption != "" {
@@ -47,14 +44,8 @@ func (m *Message) MultipartFields(writer *multipart.Writer, method string) error
 	if err == nil && m.ParseMode != "" {
 		err = field(writer, "parse_mode", m.ParseMode)
 	}
-	if err == nil && m.ChatID != nil {
-		err = field(writer, "chat_id", fmt.Sprint(m.ChatID))
-
-	} else if m.ChatID == nil {
-		err = errors.ChatIDIsMissed()
-	}
 	if err == nil && m.MessageThreadID != 0 {
-		err = field(writer, "message_thread_id", string(m.MessageThreadID))
+		err = field(writer, "message_thread_id", fmt.Sprint(m.MessageThreadID))
 	}
 	if err == nil && m.DisableNotification {
 		err = field(writer, "disable_notification", "True")

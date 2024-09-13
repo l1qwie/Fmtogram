@@ -81,14 +81,32 @@ func ErrorDuringSending() {
 	log.Printf("[%s] You have an error during sending the request to Telegram", Caption)
 }
 
-func DataWrittenSuccessfully(text string) {
+func DataWrittenSuccessfully(object, text string) {
 	if types.DEBUG {
-		log.Printf("[%s] %s saved successfuly", Caption, text)
+		log.Printf("[%s] {%s} %s saved successfuly", Caption, object, text)
+	}
+}
+
+func SettedParam(param, object string, turnOn bool) {
+	var verb string
+	if turnOn {
+		verb = "has been turned on"
+	} else {
+		verb = "has been turned off"
+	}
+	if types.DEBUG {
+		log.Printf("[%s] '%s' in objcet {%s} %s", Caption, param, object, verb)
 	}
 }
 
 func NewObjectCreated(text string) {
 	if types.DEBUG {
 		log.Printf("[%s] %s object has successfuly created", Caption, text)
+	}
+}
+
+func DataIsntEmply(object, param string, data interface{}) {
+	if !types.NoWarningMessages {
+		log.Printf("[WARNING] '%s' in object {%s} hadn't been emply before you tried to add new data. Make sure that you've edited the right object. Fmtogram is anyway going to add this data to the object, but just to be sure the data before had been: '%v'. P.S. in case everything is OK, you can turn this message off. Just make types.NoWarningMessages true", param, object, data)
 	}
 }

@@ -4,84 +4,112 @@ import (
 	"fmt"
 
 	"github.com/l1qwie/Fmtogram/logs"
+	"github.com/l1qwie/Fmtogram/types"
 )
 
-func (m *Message) WriteChatID(chatID int) {
-	m.ChatID = chatID
-	logs.DataWrittenSuccessfully("{Message} Chat ID")
-}
-
-func (m *Message) WriteChatName(chatname string) {
-	m.ChatID = fmt.Sprint("@", chatname)
-	logs.DataWrittenSuccessfully("{Message} Chat Name")
-}
-
-func (m *Message) WriteChatURL(chatURL string) {
-	m.ChatID = chatURL
-	logs.DataWrittenSuccessfully("{Message} Chat URL")
-}
-
-func (m *Message) WriteBusinessConnectionID(connectionID string) {
-	m.BusinessConnectionID = connectionID
-	logs.DataWrittenSuccessfully("{Message} Business Connection ID")
-}
+const (
+	object string = "Message"
+)
 
 func (m *Message) WriteString(text string) {
+	if m.Text != "" {
+		logs.DataIsntEmply(object, "Text", m.Text)
+	}
 	m.Text = text
-	logs.DataWrittenSuccessfully("{Message} Text")
+	logs.DataWrittenSuccessfully(object, "Text")
 }
 
 func (m *Message) WriteParseMode(parsemode string) {
+	if m.ParseMode != "" {
+		logs.DataIsntEmply(object, "Parse Mode", m.ParseMode)
+	}
 	m.ParseMode = parsemode
-	logs.DataWrittenSuccessfully("{Message} Parse Mode")
+	logs.DataWrittenSuccessfully(object, "Parse Mode")
 }
 
-// func (m *Message) WriteThreadID(threadID string) {
-// 	m.ThreadID = threadID
-// 	logs.DataWrittenSuccessfully("Message Thread ID")
-// }
+func (m *Message) WriteMessageThreadID(messageID int) {
+	if m.MessageThreadID != 0 {
+		logs.DataIsntEmply(object, "Message Thread ID", m.MessageThreadID)
+	}
+	m.MessageThreadID = messageID
+	logs.DataWrittenSuccessfully(object, "Message Thread ID")
+}
 
-// func (m *Message) WriteReplyMessageID(messageID int) {
-// 	fm.Chat.ReplyParameters.MessageID = messageID
-// 	logs.DataWrittenSuccessfully("Replyed Message ID")
-// }
+func (m *Message) WriteDisableNotification() {
+	if m.DisableNotification {
+		logs.DataIsntEmply(object, "Disable Notification", m.DisableNotification)
+	}
+	m.DisableNotification = true
+	logs.SettedParam("Disable Notification", object, m.DisableNotification)
+}
 
-// func (m *Message) WriteReplyChatID(chatID int) {
-// 	fm.Chat.ReplyParameters.ChatID = chatID
-// 	logs.DataWrittenSuccessfully("Replyed Chat ID")
-// }
+func (m *Message) WriteProtectContent() {
+	if m.ProtectContent {
+		logs.DataIsntEmply(object, "Protect Content", m.ProtectContent)
+	}
+	m.ProtectContent = true
+	logs.SettedParam("Protect Content", object, m.ProtectContent)
+}
 
-// func (m *Message) WriteReplyChatName(chatname string) {
-// 	fm.Chat.ReplyParameters.ChatID = chatname
-// 	logs.DataWrittenSuccessfully("Replyed Chat Name")
-// }
+func (m *Message) WriteMessageEffectID(messageID string) {
+	if m.MessageEffectID != "" {
+		logs.DataIsntEmply(object, "Message Effect ID", m.MessageEffectID)
+	}
+	m.MessageEffectID = messageID
+	logs.DataWrittenSuccessfully(object, "Message Effect ID")
+}
 
-// func (m *Message) WriteReplyChatURL(chatURL string) {
-// 	fm.Chat.ReplyParameters.ChatID = chatURL
-// 	logs.DataWrittenSuccessfully("Replyed Chat URL")
-// }
+func (m *Message) WriteReplyParametrs(params *types.ReplyParameters) {
+	if m.ReplyParameters != nil {
+		logs.DataIsntEmply(object, "Reply Parametrs", m.ReplyParameters)
+	}
+	m.ReplyParameters = params
+	logs.DataWrittenSuccessfully(object, "Reply Parametrs")
+}
 
-// func (m *Message) MakeAllowedSendingWithoutReply() {
-// 	fm.Chat.ReplyParameters.AllowSendingWithoutReply = true
-// 	logs.DataWrittenSuccessfully("Allow Sending Without Reply")
-// }
+func (m *Message) WriteEntities(entities []*types.MessageEntity) {
+	if len(m.Entities) != 0 {
+		logs.DataIsntEmply(object, "Entities", m.Entities)
+	}
+	m.Entities = entities
+	logs.DataWrittenSuccessfully(object, "Entities")
+}
 
-// func (m *Message) WriteReplyQuote(quote string) {
-// 	fm.Chat.ReplyParameters.Quote = quote
-// 	logs.DataWrittenSuccessfully("Replyed Quote")
-// }
+func (m *Message) WriteLinkPreviewOptions(lpo *types.LinkPreviewOptions) {
+	if m.LinkPreviewOptions != nil {
+		logs.DataIsntEmply(object, "Link Preview Options", m.LinkPreviewOptions)
+	}
+	m.LinkPreviewOptions = lpo
+	logs.DataWrittenSuccessfully(object, "Link Preview Options")
+}
 
-// func (m *Message) WriteReplyQuoteParseMode(parsemode string) {
-// 	fm.Chat.ReplyParameters.QuoteParseMode = parsemode
-// 	logs.DataWrittenSuccessfully("Replyed Quote Parse Mode")
-// }
+func checkReplyTypes(markup interface{}) bool {
+	var ok bool
+	switch markup.(type) {
+	case *types.InlineKeyboardMarkup:
+		ok = true
+	case *types.ReplyKeyboardMarkup:
+		ok = true
+	case *types.ReplyKeyboardRemove:
+		ok = true
+	case *types.ForceReply:
+		ok = true
+	}
 
-// func (m *Message) AddReplyQuoteEntities(entities []*types.MessageEntity) {
-// 	fm.Chat.ReplyParameters.QuoteEntities = entities
-// 	logs.DataWrittenSuccessfully("Replyed Quote Entities")
-// }
+	return ok
+}
 
-// func (m *Message) AddReplyQuotePosition(position int) {
-// 	fm.Chat.ReplyParameters.QuotePosition = position
-// 	logs.DataWrittenSuccessfully("Replyed Quote Position")
-// }
+func (m *Message) WriteReplyMarkup(markup interface{}) error {
+	var err error
+	ok := checkReplyTypes(markup)
+	if ok {
+		if m.ReplyMarkup != nil {
+			logs.DataIsntEmply(object, "Reply Markup", m.ReplyMarkup)
+		}
+		m.ReplyMarkup = markup
+		logs.DataWrittenSuccessfully(object, "Reply Markup")
+	} else {
+		err = fmt.Errorf("WriteReplyMarkup is waiting an interface{}, but the exactly type of the interface{} must be *types.InlineKeyboardMarkup, *types.ReplyKeyboardMarkup, *types.ReplyKeyboardRemove or *types.ForceReply")
+	}
+	return err
+}

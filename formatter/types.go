@@ -4,6 +4,8 @@ import (
 	"mime/multipart"
 	"os"
 
+	"github.com/l1qwie/Fmtogram/formatter/chat"
+	"github.com/l1qwie/Fmtogram/formatter/keyboard"
 	"github.com/l1qwie/Fmtogram/formatter/media"
 	"github.com/l1qwie/Fmtogram/formatter/message"
 	"github.com/l1qwie/Fmtogram/types"
@@ -117,10 +119,10 @@ type user struct {
 	// userID int `json:""`
 }
 
-type chat struct {
-	ChatID          interface{}           `json:"chat_id,omitempty"`
-	ReplyParameters types.ReplyParameters `json:"reply_parameters,omitempty"`
-}
+// type chat struct {
+// 	ChatID          interface{}           `json:"chat_id,omitempty"`
+// 	ReplyParameters types.ReplyParameters `json:"reply_parameters,omitempty"`
+// }
 
 type mediaStorage struct {
 	mediaData string
@@ -161,10 +163,12 @@ type Formatter struct {
 	Message  message2
 	Business business
 	User     user
-	Chat     chat
-	Media    media2
-	Char     characteristics
-	m        *message.Message
+	// Chat     chat
+	Media media2
+	Char  characteristics
+	m     *message.Message
+	ch    *chat.Chat
+	kb    keyboard.Handler
 	// Photo    media
 	// Message        SendMessage
 	// Keyboard    InlineKeyboard
@@ -176,5 +180,4 @@ type Formatter struct {
 	writer       *multipart.Writer
 	path         string
 	mediaStorage []media.Handler
-	evenone      bool
 }

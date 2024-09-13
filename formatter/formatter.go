@@ -6,24 +6,23 @@ import (
 	"log"
 
 	"github.com/l1qwie/Fmtogram/executer"
-	"github.com/l1qwie/Fmtogram/logs"
 	"github.com/l1qwie/Fmtogram/types"
 )
 
-// Save a Deleted Message ID for future deleting
-func (fm *Formatter) WriteDeleteMesId(mesID int) {
-	logs.DataWrittenSuccessfully("Deleted Message ID")
-	fm.Message.MessageID = mesID
-	fm.Message.action = DELETE
+// // Save a Deleted Message ID for future deleting
+// func (fm *Formatter) WriteDeleteMesId(mesID int) {
+// 	logs.DataWrittenSuccessfully("Deleted Message ID")
+// 	fm.Message.MessageID = mesID
+// 	fm.Message.action = DELETE
 
-}
+// }
 
-// Save an Edited Message ID for future editing
-func (fm *Formatter) WriteEditMesId(mesId int) {
-	logs.DataWrittenSuccessfully("Edited Message ID")
-	fm.Message.MessageID = mesId
-	fm.Message.action = EDIT
-}
+// // Save an Edited Message ID for future editing
+// func (fm *Formatter) WriteEditMesId(mesId int) {
+// 	logs.DataWrittenSuccessfully("Edited Message ID")
+// 	fm.Message.MessageID = mesId
+// 	fm.Message.action = EDIT
+// }
 
 // // Save an Error to handle it soon
 // func (fm *Formatter) Error(err error) {
@@ -104,12 +103,7 @@ func (fm *Formatter) MediaPreparing() (*bytes.Buffer, string, string, error) {
 	)
 	buf := bytes.NewBuffer(nil)
 	if len(fm.mediaStorage) == 1 {
-		method, contenttype, err = fm.fromStorageMedia(buf)
-		// if fm.kindofmedia[0] == fromStorage {
-		// 	method, contenttype, err = fm.fromStorageMedia(buf)
-		// } else {
-		// 	method, contenttype, err = fm.tgOrURLMedia(buf)
-		// }
+		method, contenttype, err = fm.uniqueMedia(buf)
 	} else {
 		method, contenttype, err = fm.mediaGroup(buf)
 	}

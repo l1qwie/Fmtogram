@@ -77,3 +77,11 @@ func CantMarshalJSON(err error) {
 func ChatIDIsMissed() error {
 	return fmt.Errorf("[ERROR] You must provide chatID")
 }
+
+func MissedGottenFrom(object, kindofgotten string, num int) error {
+	return fmt.Errorf("[ERROR] in object {%s} (number in queue is %d) missed %s", object, num, kindofgotten)
+}
+
+func ButtosDoesntFit(val string, data int) error {
+	return fmt.Errorf("[ERROR] data (%d) in value '%s' is out of range. 'line' is a position in the first array in [][]. 'pos' it is a position in the second array in [][]", data, val)
+}

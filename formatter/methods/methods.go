@@ -9,6 +9,7 @@ const (
 	Voice      string = "sendVoice"
 	VideoNote  string = "sendVideoNote"
 	MediaGroup string = "sendMediaGroup"
+	Message    string = "sendMessage"
 )
 
 var Media = []string{Photo, Audio, Document, Video, Animation, Voice, VideoNote, MediaGroup}
