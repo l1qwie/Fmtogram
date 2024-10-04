@@ -7,10 +7,8 @@ import (
 )
 
 type Handler interface {
-	MultipartFields(*multipart.Writer, []interface{}, int, bool) (string, error)
-	JsonFileds() (string, []byte, error)
-	CheckGottenFrom(int) (bool, error)
-	CheckThumbnailGottenFrom(int) (bool, error)
+	MultipartFields(*multipart.Writer, *[10]interface{}, int, bool) error
+	JsonFileds() ([]byte, error)
 }
 
 type Photo struct {
@@ -26,7 +24,7 @@ type Photo struct {
 	CaptionEntities       []*types.MessageEntity `json:"caption_entities,omitempty"`
 	ShowCaptionAboveMedia bool                   `json:"show_caption_above_media,omitempty"`
 	HasSpoiler            bool                   `json:"has_spoiler,omitempty"`
-	gottenFrom            int
+	GottenFrom            int
 }
 
 type Video struct {

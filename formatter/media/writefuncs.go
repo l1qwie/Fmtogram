@@ -66,10 +66,10 @@ func (ph *Photo) WriteHasSpoiler() {
 }
 
 func (ph *Photo) WriteGottenFrom(gottenfrom int) {
-	if !isItEmply(ph, checkInt, ph.gottenFrom) {
-		logs.DataIsntEmply(objectPhoto, "Gotten From", ph.gottenFrom)
+	if !isItEmply(ph, checkInt, ph.GottenFrom) {
+		logs.DataIsntEmply(objectPhoto, "Gotten From", ph.GottenFrom)
 	}
-	ph.gottenFrom = gottenfrom
+	ph.GottenFrom = gottenfrom
 	logs.DataWrittenSuccessfully(objectPhoto, "Gotten From")
 }
 

@@ -1,6 +1,10 @@
 package media
 
-import "log"
+import (
+	"log"
+
+	"github.com/l1qwie/Fmtogram/errors"
+)
 
 type checking interface {
 	defaultString(string) bool
@@ -97,4 +101,57 @@ func isItEmply(ch checking, work int, data interface{}) bool {
 	}
 
 	return ok
+}
+
+func RequiredPhotoData(ph *Photo, num int) error {
+	var err error
+	if ph.Photo == "" {
+		err = errors.MissedRequiredField(objectPhoto, "Photo{ID/FilePath/URL}", num, true)
+	}
+	if err == nil && ph.GottenFrom == 0 {
+		err = errors.MissedRequiredField(objectPhoto, "GottenFrom{media.TG, media.Storage, media.URL}", num, true)
+	}
+	return err
+}
+
+func RequiredVideoData(vd *Video, num int) error {
+	var err error
+	if vd.Video == "" {
+		err = errors.MissedRequiredField(objectVideo, "Video{ID/FilePath/URL}", num, true)
+	}
+	if err == nil && vd.VideoGottenFrom == 0 {
+		err = errors.MissedRequiredField(objectVideo, "GottenFrom{media.Telegram, media.Storage, media.Internet}", num, true)
+	}
+	if err == nil && (vd.Thumbnail != "" && vd.ThumbnailGottenFrom == 0) {
+		err = errors.MissedRequiredField(objectVideo, "ThumbnailGottenFrom{media.Telegram, media.Storage, media.Internet}", num, true)
+	}
+	return err
+}
+
+func RequiredAudioData(ad *Audio, num int) error {
+	var err error
+	if ad.Audio == "" {
+		err = errors.MissedRequiredField(objectAudio, "Audio{ID/FilePath/URL}", num, true)
+	}
+	if err == nil && ad.AudioGottenFrom == 0 {
+		err = errors.MissedRequiredField(objectAudio, "GottenFrom{media.Telegram, media.Storage, media.Internet}", num, true)
+	}
+	if err == nil && (ad.Thumbnail != "" && ad.ThumbnailGottenFrom == 0) {
+		err = errors.MissedRequiredField(objectAudio, "ThumbnailGottenFrom{media.Telegram, media.Storage, media.Internet}", num, true)
+	}
+	return err
+}
+
+func RequiredDocumentData(dc *Document, num int) error {
+	var err error
+	if dc.Document == "" {
+		err = errors.MissedRequiredField(objectDocument, "Document{ID/FilePath/URL}", num, true)
+	}
+	if err == nil && dc.DocumentGottenFrom == 0 {
+		err = errors.MissedRequiredField(objectDocument, "GottenFrom{media.Telegram, media.Storage, media.Internet}", num, true)
+	}
+	if err == nil && (dc.Thumbnail != "" && dc.ThumbnailGottenFrom == 0) {
+		err = errors.MissedRequiredField(objectDocument, "ThumbnailGottenFrom{media.Telegram, media.Storage, media.Internet}", num, true)
+	}
+	return err
 }

@@ -85,3 +85,37 @@ func MissedGottenFrom(object, kindofgotten string, num int) error {
 func ButtosDoesntFit(val string, data int) error {
 	return fmt.Errorf("[ERROR] data (%d) in value '%s' is out of range. 'line' is a position in the first array in [][]. 'pos' it is a position in the second array in [][]", data, val)
 }
+
+func MustBe(objects, fields, funcnames []string) error {
+	var mesErr string
+	for i := range objects {
+		mesErr += fmt.Sprintf("There must be some data in %s field in object %s. Use %s to add your data.\n", fields[i], objects[i], funcnames[i])
+	}
+	return fmt.Errorf("[ERROR] Some data is missed! There's more info:\n %s", mesErr)
+}
+
+func MissedRequiredField(object, field string, objnum int, media bool) error {
+	var err error
+	if media {
+		err = fmt.Errorf("[ERROR] Field %s is required in object %s (the object was added as %dth)", field, object, objnum)
+	} else {
+		err = fmt.Errorf("[ERROR] Field %s is required in object %s", field, object)
+	}
+	return err
+}
+
+func CantMakeRequest(err error) error {
+	return fmt.Errorf("[ERROR] Somthing went wrong! Couldn't send the request! more information: %s", err)
+}
+
+func CantGetResponse(err error) error {
+	return fmt.Errorf("[ERROR] Somthing went wrong! Couldn't get the response! more information: %s", err)
+}
+
+func CantReadResponse(err error) error {
+	return fmt.Errorf("[ERROR] Somthing went wrong! Couldn't read the response! more information: %s", err)
+}
+
+func CantUnmarshal(err error) error {
+	return fmt.Errorf("[ERROR] Somthing went wrong! Couldn't unmarshal the response ([]byte)! more information: %s", err)
+}

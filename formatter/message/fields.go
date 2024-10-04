@@ -6,7 +6,6 @@ import (
 	"mime/multipart"
 
 	"github.com/l1qwie/Fmtogram/errors"
-	"github.com/l1qwie/Fmtogram/formatter/methods"
 )
 
 func field(w *multipart.Writer, fieldname, value string) error {
@@ -17,24 +16,8 @@ func field(w *multipart.Writer, fieldname, value string) error {
 	return err
 }
 
-func (m *Message) captionText(method string) {
-	var found bool
-	for i := 0; i < len(methods.Media) && !found; i++ {
-		if methods.Media[i] == method {
-			found = true
-		}
-	}
-	if found {
-		if method != methods.MediaGroup {
-			m.Caption = m.Text
-			m.Text = ""
-		}
-	}
-}
-
-func (m *Message) MultipartFields(writer *multipart.Writer, method string) error {
+func MultipartFields(m *Message, writer *multipart.Writer) error {
 	var err error
-	m.captionText(method)
 	if m.Text != "" {
 		err = field(writer, "text", m.Text)
 	}
@@ -67,8 +50,7 @@ func (m *Message) MultipartFields(writer *multipart.Writer, method string) error
 	return err
 }
 
-func CreateJSON(message *Message, method string) ([]byte, error) {
-	message.captionText(method)
+func CreateJSON(message *Message) ([]byte, error) {
 	body, err := json.Marshal(message)
 	if err != nil {
 		errors.CantMarshalJSON(err)

@@ -11,7 +11,7 @@ import (
 	"github.com/l1qwie/Fmtogram/types"
 )
 
-var StartFunc func(*types.Telegram, *types.Telegram) *formatter.Formatter
+var StartFunc func(*types.Telegram, *types.Telegram, *formatter.Message)
 
 func firstStep(offset *int) {
 	logs.GetOffset()
@@ -40,7 +40,7 @@ func queue(reg *executer.RegTable, tg *types.Telegram, chatID, index int) {
 	}
 }
 
-func pullResponse(output chan *formatter.Formatter, reg *executer.RegTable) {
+func pullResponse(reg *executer.RegTable) {
 	var offset int
 	firstStep(&offset)
 	for {
@@ -53,7 +53,7 @@ func pullResponse(output chan *formatter.Formatter, reg *executer.RegTable) {
 			index := reg.Seeker(chatID)
 
 			queue(reg, tg, chatID, index)
-			go worker(reg.Reg[index].Chu, reg.Reg[index].Chb, output)
+			go worker(reg.Reg[index].Chu, reg.Reg[index].Chb)
 
 			offset = offset + 1
 		} else if err != nil {
@@ -63,40 +63,21 @@ func pullResponse(output chan *formatter.Formatter, reg *executer.RegTable) {
 	}
 }
 
-func worker(input chan *types.Telegram, returned chan *types.Telegram, output chan *formatter.Formatter) {
-	// // tg := new(types.Telegram)
-	// // tgReturned := new(types.Telegram)
+func worker(input chan *types.Telegram, returned chan *types.Telegram) {
+	tg := new(types.Telegram)
+	tgReturned := new(types.Telegram)
 
-	// for len(input) > 0 {
-	// 	tg = <-input
-	// 	if len(returned) > 0 {
-	// 		logs.ReturnedIsntEmply()
-	// 		tgReturned = <-returned
-	// 	} else {
-	// 		logs.ReturnedIsEmply()
-	// 	}
-	// 	logs.CallDeveloperFunc()
-	// 	// fm := StartFunc(tg, tgReturned)
-	// 	// if err := fm.Complete(); err == nil {
-	// 	// 	output <- fm
-	// 	// }
-	// }
-}
-
-func pushRequest(requests <-chan *formatter.Formatter, reg *executer.RegTable) {
-	for r := range requests {
-		logs.GottenRequest()
-
-		mes, err := r.Make()
-		if err != nil {
-			logs.ErrorDuringSending()
-		}
-		if mes.Ok {
+	for len(input) > 0 {
+		tg = <-input
+		if len(returned) > 0 {
 			logs.ReturnedIsntEmply()
-			index := reg.Seeker(mes.Result[0].Message.From.ID)
-			reg.Reg[index].Chb = make(chan *types.Telegram, 1)
-			reg.Reg[index].Chb <- mes
+			tgReturned = <-returned
+		} else {
+			logs.ReturnedIsEmply()
 		}
+		logs.CallDeveloperFunc()
+		mes := formatter.CreateMessage(tg)
+		StartFunc(tg, tgReturned, mes)
 	}
 }
 
@@ -105,12 +86,6 @@ func Start() {
 	logs.DebugOrInfo()
 	logs.TurnOn()
 
-	requests := make(chan *formatter.Formatter)
 	reg := new(executer.RegTable)
-	go pullResponse(requests, reg)
-	go pushRequest(requests, reg)
-
-	for {
-		time.Sleep(time.Second * 10)
-	}
+	pullResponse(reg)
 }

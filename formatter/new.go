@@ -13,62 +13,58 @@ const (
 	inlineKB string = "Inline Keyboard"
 )
 
-func (fm *Formatter) NewPhoto() *media.Photo {
-	photo := &media.Photo{Type: "photo"}
-	fm.mediaStorage = append(fm.mediaStorage, photo)
+// Creates a new "photo" object. The preferred way to create a project if you need to see the logs.
+// If you don't need that, you can create the object directly from "media" package
+func (m *Message) NewPhoto() *media.Photo {
 	logs.NewObjectCreated("Photo")
-	return photo
+	return &media.Photo{Type: "photo"}
 }
 
-func (fm *Formatter) NewDocument() *media.Document {
-	document := &media.Document{Type: "document"}
-	fm.mediaStorage = append(fm.mediaStorage, document)
+// Creates a new "document" object. The preferred way to create a project if you need to see the logs.
+// If you don't need that, you can create the object directly from "media" package
+func (m *Message) NewDocument() *media.Document {
 	logs.NewObjectCreated("Document")
-	return document
+	return &media.Document{Type: "document"}
 }
 
-func (fm *Formatter) NewAudio() *media.Audio {
-	audio := &media.Audio{Type: "audio"}
-	fm.mediaStorage = append(fm.mediaStorage, audio)
+// Creates a new "audio" object. The preferred way to create a project if you need to see the logs.
+// If you don't need that, you can create the object directly from "media" package
+func (m *Message) NewAudio() *media.Audio {
 	logs.NewObjectCreated("Audio")
-	return audio
+	return &media.Audio{Type: "audio"}
 }
 
-func (fm *Formatter) NewVideo() *media.Video {
-	video := &media.Video{Type: "video"}
-	fm.mediaStorage = append(fm.mediaStorage, video)
+// Creates a new "video" object. The preferred way to create a project if you need to see the logs.
+// If you don't need that, you can create the object directly from "media" package
+func (m *Message) NewVideo() *media.Video {
 	logs.NewObjectCreated("Video")
-	return video
+	return &media.Video{Type: "video"}
 }
 
-func (fm *Formatter) NewMessage() *message.Message {
-	fm.m = new(message.Message)
+// Creates a new "message" object. The preferred way to create a project if you need to see the logs.
+// If you don't need that, you can create the object directly from "message" package
+func (m *Message) NewMessage() *message.Message {
 	logs.NewObjectCreated("Message")
-	return fm.m
+	return new(message.Message)
 }
 
-func (fm *Formatter) NewChat() *chat.Chat {
-	fm.ch = new(chat.Chat)
+// Creates a new "chat" object. The preferred way to create a project if you need to see the logs.
+// If you don't need that, you can create the object directly from "chat" package
+func (m *Message) NewChat() *chat.Chat {
 	logs.NewObjectCreated("Chat")
-	return fm.ch
+	return new(chat.Chat)
 }
 
-func (fm *Formatter) NewInlineKeyboard() *keyboard.Inline {
-	if fm.kb != nil {
-		logs.DataIsntEmply(inlineKB, "keyboard", fm.kb)
-	}
-	keyboard := new(keyboard.Inline)
-	fm.kb = keyboard
+// Creates a new "inline keyboard" object. The preferred way to create a project if you need to see the logs.
+// If you don't need that, you can create the object directly from "keyboard" package
+func (m *Message) NewInlineKeyboard() *keyboard.Inline {
 	logs.NewObjectCreated("Inline Keyboard")
-	return keyboard
+	return new(keyboard.Inline)
 }
 
-func (fm *Formatter) NewReplyKeyboard() *keyboard.Reply {
-	if fm.kb != nil {
-		logs.DataIsntEmply(replyKB, "keyboard", fm.kb)
-	}
-	keyboard := new(keyboard.Reply)
-	fm.kb = keyboard
+// Creates a new "reply keyboard" object. The preferred way to create a project if you need to see the logs.
+// If you don't need that, you can create the object directly from "keyboard" package
+func (m *Message) NewReplyKeyboard() *keyboard.Reply {
 	logs.NewObjectCreated("Reply Keyboard")
-	return keyboard
+	return new(keyboard.Reply)
 }

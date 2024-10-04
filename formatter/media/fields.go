@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"os"
 
 	"github.com/l1qwie/Fmtogram/errors"
-	"github.com/l1qwie/Fmtogram/formatter/methods"
 	"github.com/l1qwie/Fmtogram/types"
 )
 
@@ -76,7 +74,7 @@ func commonFields(writer *multipart.Writer, captionEntities []*types.MessageEnti
 	return err
 }
 
-func (ph *Photo) MultipartFields(writer *multipart.Writer, group []interface{}, i int, input bool) (string, error) {
+func (ph *Photo) MultipartFields(writer *multipart.Writer, group *[10]interface{}, i int, input bool) error {
 	err := commonFields(writer, ph.CaptionEntities)
 	if err == nil {
 		if input {
@@ -106,33 +104,14 @@ func (ph *Photo) MultipartFields(writer *multipart.Writer, group []interface{}, 
 	if group != nil {
 		group[i] = ph
 	}
-	return methods.Photo, err
+	return err
 }
 
-func (ph *Photo) JsonFileds() (string, []byte, error) {
-	phjson, err := json.Marshal(ph)
-	return methods.Photo, phjson, err
+func (ph *Photo) JsonFileds() ([]byte, error) {
+	return json.Marshal(ph)
 }
 
-func (ph *Photo) CheckGottenFrom(numberInQueue int) (bool, error) {
-	var (
-		fromStorage bool
-		err         error
-	)
-	if ph.gottenFrom == 0 {
-		err = errors.MissedGottenFrom(objectPhoto, "Gotten From", numberInQueue)
-	}
-	if ph.gottenFrom == Storage {
-		fromStorage = true
-	}
-	return fromStorage, err
-}
-
-func (vd *Photo) CheckThumbnailGottenFrom(numberInQueue int) (bool, error) {
-	return false, nil
-}
-
-func (vd *Video) MultipartFields(writer *multipart.Writer, group []interface{}, i int, input bool) (string, error) {
+func (vd *Video) MultipartFields(writer *multipart.Writer, group *[10]interface{}, i int, input bool) error {
 	err := commonFields(writer, vd.CaptionEntities)
 	if err == nil {
 		if input {
@@ -189,45 +168,14 @@ func (vd *Video) MultipartFields(writer *multipart.Writer, group []interface{}, 
 	if group != nil {
 		group[i] = vd
 	}
-	return methods.Video, err
+	return err
 }
 
-func (vd *Video) JsonFileds() (string, []byte, error) {
-	vidjson, err := json.Marshal(vd)
-	return methods.Video, vidjson, err
+func (vd *Video) JsonFileds() ([]byte, error) {
+	return json.Marshal(vd)
 }
 
-func (vd *Video) CheckGottenFrom(numberInQueue int) (bool, error) {
-	var (
-		fromStorage bool
-		err         error
-	)
-	if vd.VideoGottenFrom == 0 {
-		err = errors.MissedGottenFrom(objectVideo, "Gotten From", numberInQueue)
-	}
-	if vd.VideoGottenFrom == Storage {
-		fromStorage = true
-	}
-	return fromStorage, err
-}
-
-func (vd *Video) CheckThumbnailGottenFrom(numberInQueue int) (bool, error) {
-	var (
-		fromStorage bool
-		err         error
-	)
-	if vd.Thumbnail != "" {
-		if vd.ThumbnailGottenFrom == 0 {
-			err = errors.MissedGottenFrom(objectVideo, "Thumbnail Gotten From", numberInQueue)
-		}
-	}
-	if vd.ThumbnailGottenFrom == Storage {
-		fromStorage = true
-	}
-	return fromStorage, err
-}
-
-func (ad *Audio) MultipartFields(writer *multipart.Writer, group []interface{}, i int, input bool) (string, error) {
+func (ad *Audio) MultipartFields(writer *multipart.Writer, group *[10]interface{}, i int, input bool) error {
 	err := commonFields(writer, ad.CaptionEntities)
 	if err == nil {
 		if input {
@@ -260,45 +208,14 @@ func (ad *Audio) MultipartFields(writer *multipart.Writer, group []interface{}, 
 	if group != nil {
 		group[i] = ad
 	}
-	return methods.Audio, err
+	return err
 }
 
-func (ad *Audio) JsonFileds() (string, []byte, error) {
-	adjson, err := json.Marshal(ad)
-	return methods.Video, adjson, err
+func (ad *Audio) JsonFileds() ([]byte, error) {
+	return json.Marshal(ad)
 }
 
-func (ad *Audio) CheckGottenFrom(numberInQueue int) (bool, error) {
-	var (
-		fromStorage bool
-		err         error
-	)
-	if ad.AudioGottenFrom == 0 {
-		err = errors.MissedGottenFrom(objectAudio, "Gotten From", numberInQueue)
-	}
-	if ad.AudioGottenFrom == Storage {
-		fromStorage = true
-	}
-	return fromStorage, err
-}
-
-func (ad *Audio) CheckThumbnailGottenFrom(numberInQueue int) (bool, error) {
-	var (
-		fromStorage bool
-		err         error
-	)
-	if ad.Thumbnail != "" {
-		if ad.ThumbnailGottenFrom == 0 {
-			err = errors.MissedGottenFrom(objectAudio, "Thumbnail Gotten From", numberInQueue)
-		}
-	}
-	if ad.ThumbnailGottenFrom == Storage {
-		fromStorage = true
-	}
-	return fromStorage, err
-}
-
-func (dc *Document) MultipartFields(writer *multipart.Writer, group []interface{}, i int, input bool) (string, error) {
+func (dc *Document) MultipartFields(writer *multipart.Writer, group *[10]interface{}, i int, input bool) error {
 	err := commonFields(writer, dc.CaptionEntities)
 	if err == nil {
 		if input {
@@ -324,12 +241,11 @@ func (dc *Document) MultipartFields(writer *multipart.Writer, group []interface{
 	if group != nil {
 		group[i] = dc
 	}
-	return methods.Document, err
+	return err
 }
 
-func (dc *Document) JsonFileds() (string, []byte, error) {
-	dcjson, err := json.Marshal(dc)
-	return methods.Video, dcjson, err
+func (dc *Document) JsonFileds() ([]byte, error) {
+	return json.Marshal(dc)
 }
 
 func (dc *Document) CheckGottenFrom(numberInQueue int) (bool, error) {
@@ -362,12 +278,10 @@ func (dc *Document) CheckThumbnailGottenFrom(numberInQueue int) (bool, error) {
 	return fromStorage, err
 }
 
-func Group(writer *multipart.Writer, group []interface{}) error {
-	log.Print(group)
+func Group(writer *multipart.Writer, group [10]interface{}) error {
 	mediaJSON, err := json.Marshal(group)
 	if err == nil && len(mediaJSON) != 0 {
 		err = writer.WriteField("media", string(mediaJSON))
 	}
-	log.Print(string(mediaJSON))
 	return err
 }
