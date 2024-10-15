@@ -105,6 +105,12 @@ func NewObjectCreated(text string) {
 	}
 }
 
+func NewInterface(text string) {
+	if types.DEBUG {
+		log.Printf("[%s] new interface %s has just created", Caption, text)
+	}
+}
+
 func DataIsntEmply(object, param string, data interface{}) {
 	if !types.NoWarningMessages {
 		log.Printf("[WARNING] '%s' in object {%s} hadn't been emply before you tried to add new data. Make sure that you've edited the right object. Fmtogram is anyway going to add this data to the object, but just to be sure the data before had been: '%v'. P.S. in case everything is OK, you can turn this message off. Just make types.NoWarningMessages true", param, object, data)
@@ -114,5 +120,17 @@ func DataIsntEmply(object, param string, data interface{}) {
 func ObjectSaved(object string) {
 	if types.DEBUG {
 		log.Printf("[%s] object '%s' has been saved", Caption, object)
+	}
+}
+
+func InterfaceSaved(interf string) {
+	if types.DEBUG {
+		log.Printf("[%s] interface {%s} has saved to the message successfuly", Caption, interf)
+	}
+}
+
+func DataMightBeLost(object, field, data, object1, field1 string) {
+	if !types.NoWarningMessages {
+		log.Printf("[WARNING] You might lose your data.  You put '%s' into field '%s' in {%s} object. Insted put it in {%s} object, field '%s'", data, field, object, object1, field1)
 	}
 }

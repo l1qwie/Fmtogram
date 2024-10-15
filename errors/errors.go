@@ -119,3 +119,7 @@ func CantReadResponse(err error) error {
 func CantUnmarshal(err error) error {
 	return fmt.Errorf("[ERROR] Somthing went wrong! Couldn't unmarshal the response ([]byte)! more information: %s", err)
 }
+
+func TelegramError(errcode int, discription string) error {
+	return fmt.Errorf("[ERROR] Code: %d | Discription: '%s'", errcode, discription)
+}

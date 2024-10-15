@@ -462,7 +462,7 @@ type BadResponse struct {
 	Description string `json:"description"`
 }
 
-type MessageResponse struct {
+type TelegramResponse struct {
 	Ok          bool           `json:"ok"`
 	Result      *Message       `json:"result,omitempty"`
 	Error       *TelegramError `json:"error,omitempty"`

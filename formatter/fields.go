@@ -1,4 +1,4 @@
-package media
+package formatter
 
 import (
 	"encoding/json"
@@ -74,7 +74,7 @@ func commonFields(writer *multipart.Writer, captionEntities []*types.MessageEnti
 	return err
 }
 
-func (ph *Photo) MultipartFields(writer *multipart.Writer, group *[10]interface{}, i int, input bool) error {
+func (ph *photo) multipartFields(writer *multipart.Writer, group *[]interface{}, i int, input bool) error {
 	err := commonFields(writer, ph.CaptionEntities)
 	if err == nil {
 		if input {
@@ -102,16 +102,16 @@ func (ph *Photo) MultipartFields(writer *multipart.Writer, group *[10]interface{
 		}
 	}
 	if group != nil {
-		group[i] = ph
+		(*group)[i] = ph
 	}
 	return err
 }
 
-func (ph *Photo) JsonFileds() ([]byte, error) {
+func (ph *photo) jsonFileds() ([]byte, error) {
 	return json.Marshal(ph)
 }
 
-func (vd *Video) MultipartFields(writer *multipart.Writer, group *[10]interface{}, i int, input bool) error {
+func (vd *video) multipartFields(writer *multipart.Writer, group *[]interface{}, i int, input bool) error {
 	err := commonFields(writer, vd.CaptionEntities)
 	if err == nil {
 		if input {
@@ -166,16 +166,16 @@ func (vd *Video) MultipartFields(writer *multipart.Writer, group *[10]interface{
 		err = writer.WriteField("supports_streaming", "True")
 	}
 	if group != nil {
-		group[i] = vd
+		(*group)[i] = vd
 	}
 	return err
 }
 
-func (vd *Video) JsonFileds() ([]byte, error) {
+func (vd *video) jsonFileds() ([]byte, error) {
 	return json.Marshal(vd)
 }
 
-func (ad *Audio) MultipartFields(writer *multipart.Writer, group *[10]interface{}, i int, input bool) error {
+func (ad *audio) multipartFields(writer *multipart.Writer, group *[]interface{}, i int, input bool) error {
 	err := commonFields(writer, ad.CaptionEntities)
 	if err == nil {
 		if input {
@@ -206,16 +206,16 @@ func (ad *Audio) MultipartFields(writer *multipart.Writer, group *[10]interface{
 		err = addThumbnail(writer, ad.Thumbnail, ad.ThumbnailGottenFrom)
 	}
 	if group != nil {
-		group[i] = ad
+		(*group)[i] = ad
 	}
 	return err
 }
 
-func (ad *Audio) JsonFileds() ([]byte, error) {
+func (ad *audio) jsonFileds() ([]byte, error) {
 	return json.Marshal(ad)
 }
 
-func (dc *Document) MultipartFields(writer *multipart.Writer, group *[10]interface{}, i int, input bool) error {
+func (dc *document) multipartFields(writer *multipart.Writer, group *[]interface{}, i int, input bool) error {
 	err := commonFields(writer, dc.CaptionEntities)
 	if err == nil {
 		if input {
@@ -239,49 +239,111 @@ func (dc *Document) MultipartFields(writer *multipart.Writer, group *[10]interfa
 		}
 	}
 	if group != nil {
-		group[i] = dc
+		(*group)[i] = dc
 	}
 	return err
 }
 
-func (dc *Document) JsonFileds() ([]byte, error) {
+func (dc *document) jsonFileds() ([]byte, error) {
 	return json.Marshal(dc)
 }
 
-func (dc *Document) CheckGottenFrom(numberInQueue int) (bool, error) {
-	var (
-		fromStorage bool
-		err         error
-	)
-	if dc.DocumentGottenFrom == 0 {
-		err = errors.MissedGottenFrom(objectDocument, "Gotten From", numberInQueue)
-	}
-	if dc.DocumentGottenFrom == Storage {
-		fromStorage = true
-	}
-	return fromStorage, err
-}
-
-func (dc *Document) CheckThumbnailGottenFrom(numberInQueue int) (bool, error) {
-	var (
-		fromStorage bool
-		err         error
-	)
-	if dc.Thumbnail != "" {
-		if dc.ThumbnailGottenFrom == 0 {
-			err = errors.MissedGottenFrom(objectDocument, "Thumbnail Gotten From", numberInQueue)
-		}
-	}
-	if dc.ThumbnailGottenFrom == Storage {
-		fromStorage = true
-	}
-	return fromStorage, err
-}
-
-func Group(writer *multipart.Writer, group [10]interface{}) error {
+func putGroup(writer *multipart.Writer, group []interface{}) error {
 	mediaJSON, err := json.Marshal(group)
 	if err == nil && len(mediaJSON) != 0 {
 		err = writer.WriteField("media", string(mediaJSON))
 	}
 	return err
+}
+
+func field(w *multipart.Writer, fieldname, value string) error {
+	err := w.WriteField(fieldname, value)
+	if err != nil {
+		errors.CantWriteField(err)
+	}
+	return err
+}
+
+func (inf *information) multipartFields(writer *multipart.Writer) error {
+	var err error
+	if inf.Text != "" {
+		err = field(writer, "text", inf.Text)
+	}
+	if err == nil && inf.Caption != "" {
+		err = field(writer, "caption", inf.Caption)
+	}
+	if err == nil && inf.ParseMode != "" {
+		err = field(writer, "parse_mode", inf.ParseMode)
+	}
+	if err == nil && inf.MessageThreadID != 0 {
+		err = field(writer, "message_thread_id", fmt.Sprint(inf.MessageThreadID))
+	}
+	if err == nil && inf.DisableNotification {
+		err = field(writer, "disable_notification", "True")
+	}
+	if err == nil && inf.ProtectContent {
+		err = field(writer, "protect_content", "True")
+	}
+	if err == nil && inf.MessageEffectID != "" {
+		err = field(writer, "message_effect_id", inf.MessageEffectID)
+	}
+	if err == nil && inf.ReplyParameters != nil {
+		body, err1 := json.Marshal(inf.ReplyParameters)
+		if err1 == nil {
+			err = field(writer, "reply_parameters", string(body))
+		} else {
+			errors.CantMarshalJSON(err)
+		}
+	}
+	return err
+}
+
+func (inf *information) createJSON() ([]byte, error) {
+	body, err := json.Marshal(inf)
+	if err != nil {
+		errors.CantMarshalJSON(err)
+	}
+	return body, err
+}
+
+func (ch *chat) multipartFields(writer *multipart.Writer) error {
+	var err error
+	if ch.ID != nil {
+		err = field(writer, "chat_id", fmt.Sprint(ch.ID))
+
+	} else if ch.ID == nil {
+		err = errors.ChatIDIsMissed()
+	}
+	if ch.BusinessConnectionID != "" {
+		err = field(writer, "business_connection_id", ch.BusinessConnectionID)
+	}
+	return err
+}
+
+func (ch *chat) createJson() ([]byte, error) {
+	return json.Marshal(ch)
+}
+
+func (in *inline) MultipartFields(writer *multipart.Writer) error {
+	inbody, err := json.Marshal(in.InlineKeyboard)
+	if err == nil {
+		err = writer.WriteField("reply_markup", string(inbody))
+	}
+	return err
+}
+
+func (in *inline) JsonFields() ([]byte, error) {
+	return json.Marshal(in.InlineKeyboard)
+}
+
+func (rp *reply) MultipartFields(writer *multipart.Writer) error {
+	rpbody, err := json.Marshal(rp.Keyboard)
+	if err == nil {
+		err = writer.WriteField("reply_markup", string(rpbody))
+	}
+	return err
+}
+
+func (rp *reply) JsonFields() ([]byte, error) {
+	return json.Marshal(rp.Keyboard)
 }
