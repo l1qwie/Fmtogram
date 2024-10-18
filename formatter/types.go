@@ -6,17 +6,17 @@ import (
 )
 
 type mediaHolder struct {
-	storage [10]handlerMedia
-	i       int
-	amount  int
-	evenone bool
+	storage     [10]handlerMedia
+	i           int
+	amount      int
+	atLeastOnce bool
 }
 
 type formatter struct {
 	inf         *information
 	ch          *chat
 	kb          handlerKB
-	contenttype string
+	contentType string
 	writer      *multipart.Writer
 	mh          *mediaHolder
 	buf         *bytes.Buffer

@@ -325,7 +325,7 @@ func (ch *chat) createJson() ([]byte, error) {
 }
 
 func (in *inline) MultipartFields(writer *multipart.Writer) error {
-	inbody, err := json.Marshal(in.InlineKeyboard)
+	inbody, err := json.Marshal(in.Keyboard)
 	if err == nil {
 		err = writer.WriteField("reply_markup", string(inbody))
 	}
@@ -333,7 +333,7 @@ func (in *inline) MultipartFields(writer *multipart.Writer) error {
 }
 
 func (in *inline) JsonFields() ([]byte, error) {
-	return json.Marshal(in.InlineKeyboard)
+	return json.Marshal(in)
 }
 
 func (rp *reply) MultipartFields(writer *multipart.Writer) error {
@@ -345,5 +345,5 @@ func (rp *reply) MultipartFields(writer *multipart.Writer) error {
 }
 
 func (rp *reply) JsonFields() ([]byte, error) {
-	return json.Marshal(rp.Keyboard)
+	return json.Marshal(rp)
 }

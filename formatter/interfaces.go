@@ -17,7 +17,7 @@ type handlerKB interface {
 }
 
 type IPhoto interface {
-	// Receives Telegram ID of a photo, Url-link with the a photo or name of a photo in storage
+	// Receives Telegram ID of a photo, URL-link with the a photo or name of a photo in storage
 	WritePhoto(string)
 
 	// Receives a string that will be a caption of the photo. If you're going to send
@@ -34,7 +34,7 @@ type IPhoto interface {
 	// Doesn't recieve anything. If the function was called, the photo will be blured
 	WriteHasSpoiler()
 
-	// Must be used. There are three options to send data: formatter.Storage, formatter.URL, formatter.Telegram
+	// Must be used. There are three options to send data: formatter.Storage, formatter.URL, formatter.Telegram.
 	// It shows where the bot must wait the photo from
 	WriteGottenFrom(int)
 
@@ -43,6 +43,9 @@ type IPhoto interface {
 }
 
 type IVideo interface {
+	// Receives Telegram ID of a video, Url-link with the a video or name of a video in storage
+	WriteVideo(string)
+
 	// Receives a string that will be a caption of the video. If you're going to send
 	// one video and you want to send a text-message you have to use it insted of WriteString(string)
 	// in MSGInformation interface
@@ -67,9 +70,15 @@ type IVideo interface {
 	WriteThumbnail(thumbnail string)
 	WriteThumbnailGottenFrom(gottenfrom int)
 	WriteWidth(width int)
+
+	// You can call this function after calling Send(). It returns you a structure with some data about the video you just sent
+	GetResponse() *types.Video
 }
 
 type IAudio interface {
+	// Receives Telegram ID of an audio, Url-link with the an audio or name of an audio in storage
+	WriteAudio(string)
+
 	// Receives a string that will be a caption of the audio. If you're going to send
 	// one audio and you want to send a text-message you have to use it insted of WriteString(string)
 	// in MSGInformation interface
@@ -89,6 +98,9 @@ type IAudio interface {
 	WriteThumbnail(thumbnail string)
 	WriteThumbnailGottenFrom(gottenfrom int)
 	WriteTitle(title string)
+
+	// You can call this function after calling Send(). It returns you a structure with some data about the audio you just sent
+	GetResponse() *types.Audio
 }
 
 type IDocument interface {
@@ -111,6 +123,9 @@ type IDocument interface {
 
 	WriteThumbnail(thumbnail string)
 	WriteThumbnailGottenFrom(gottenfrom int)
+
+	// You can call this function after calling Send(). It returns you a structure with some data about the document you just sent
+	GetResponse() *types.Document
 }
 
 type MSGInformation interface {
@@ -158,7 +173,7 @@ type IReply interface {
 	// and might return and error, if the coordinates are wrong
 	NewButton(line int, pos int) (IReplyButton, error)
 
-	// Receives a slice of integers and sets the plan of future reply-keyboard. Be careful with data, because one array cell is one array cell is considered
+	// Receives a slice of integers and sets the plan of future reply-keyboard. Be careful with data, because one array cell is considered
 	// as row, so, for example: a slice []int{2, 1, 4} means that in the reply-keyboard will be 3 rows and in the first one there'll be 2 buttons, in the next one: just one
 	// and in the last one: 4 buttons
 	Set(plan []int)

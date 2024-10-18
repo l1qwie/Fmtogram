@@ -47,6 +47,7 @@ type video struct {
 	HasSpoiler            bool                   `json:"has_spoiler,omitempty"`
 	VideoGottenFrom       int
 	ThumbnailGottenFrom   int
+	ResponseData          *types.Video
 }
 
 type audio struct {
@@ -66,6 +67,7 @@ type audio struct {
 	Title               string                 `json:"title,omitempty"`
 	AudioGottenFrom     int
 	ThumbnailGottenFrom int
+	ResponseData        *types.Audio
 }
 
 type document struct {
@@ -83,6 +85,7 @@ type document struct {
 	DisableContentTypeDetection bool                   `json:"disable_content_type_detection,omitempty"`
 	DocumentGottenFrom          int
 	ThumbnailGottenFrom         int
+	ResponseData                *types.Document
 }
 
 type information struct {
@@ -120,6 +123,10 @@ type inlineKeyboardButton struct {
 }
 
 type inline struct {
+	Keyboard *inlineKeyboard `json:"reply_markup,omitempty"`
+}
+
+type inlineKeyboard struct {
 	InlineKeyboard [][]*inlineKeyboardButton `json:"inline_keyboard"`
 }
 
@@ -134,6 +141,10 @@ type replyKeyboardButton struct {
 }
 
 type reply struct {
+	Keyboard *replyKeyboard `json:"reply_markup,omitempty"`
+}
+
+type replyKeyboard struct {
 	Keyboard              [][]*replyKeyboardButton `json:"keyboard"`
 	IsPersistent          bool                     `json:"is_persistent,omitempty"`
 	ResizeKeyboard        bool                     `json:"resize_keyboard,omitempty"`

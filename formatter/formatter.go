@@ -96,7 +96,7 @@ func requiredMessage(msg *Message, tgr *interface{}, APIMethod, object string) (
 	}
 	if APIMethod == "" {
 		APIMethod = methods.Message
-		msg.fm.contenttype = "application/json"
+		msg.fm.contentType = "application/json"
 		*tgr = new(types.TelegramResponse)
 	}
 	return APIMethod, err
@@ -117,7 +117,7 @@ func messagePart(msg *Message) error {
 	var err error
 	var bytes []byte
 
-	if msg.fm.mh.evenone {
+	if msg.fm.mh.atLeastOnce {
 		err = msg.fm.inf.multipartFields(msg.fm.writer)
 	} else {
 
@@ -136,7 +136,7 @@ func keyboardPart(msg *Message) error {
 
 	if msg.fm.kb != nil {
 
-		if msg.fm.mh.evenone {
+		if msg.fm.mh.atLeastOnce {
 			err = msg.fm.kb.MultipartFields(msg.fm.writer)
 		} else {
 
@@ -155,7 +155,7 @@ func chatPart(msg *Message) error {
 	var err error
 	var bytes []byte
 
-	if msg.fm.mh.evenone {
+	if msg.fm.mh.atLeastOnce {
 		err = msg.fm.ch.multipartFields(msg.fm.writer)
 	} else {
 
@@ -224,8 +224,10 @@ func makeRequest(msg *Message, tgr *interface{}) (string, error) {
 			err = doPlan[i](msg)
 		}
 	}
-	if err == nil && !msg.fm.mh.evenone {
+	if err == nil && !msg.fm.mh.atLeastOnce {
 		err = uniteEverything(msg)
+	} else {
+		err = msg.fm.writer.Close()
 	}
 	return APIMethod, err
 }
@@ -270,9 +272,12 @@ func distributorTelegramResponse(msg *Message, t *types.TelegramResponse) {
 						Height:       t.Result.Photo[k].Height,
 					}
 				}
-				// case *media.Video:
-				// case *media.Audio:
-				// case *media.Document:
+			case *video:
+				m.ResponseData = t.Result.Video
+			case *audio:
+				m.ResponseData = t.Result.Audio
+			case *document:
+				m.ResponseData = t.Result.Document
 			}
 			j++
 		}
@@ -285,14 +290,14 @@ func sendRequest(msg *Message, tgr interface{}, APIMethod string) error {
 
 	log.Print(msg.fm.buf.String())
 	log.Print(APIMethod)
-	log.Print(msg.fm.contenttype)
+	log.Print(msg.fm.contentType)
 
 	url := fmt.Sprint(types.TelegramAPI, testbotdata.Token, "/", APIMethod)
 
 	log.Print(url)
 
 	req, err := http.NewRequest("POST", url, msg.fm.buf)
-	req.Header.Set("Content-Type", msg.fm.contenttype)
+	req.Header.Set("Content-Type", msg.fm.contentType)
 
 	if err != nil {
 		err = errors.CantMakeRequest(err)
@@ -311,7 +316,7 @@ func sendRequest(msg *Message, tgr interface{}, APIMethod string) error {
 				err = errors.CantReadResponse(err)
 			} else {
 
-				// fmt.Println(string(body))
+				fmt.Println(string(body))
 
 				err = json.Unmarshal(body, tgr)
 				if err != nil {
@@ -322,7 +327,7 @@ func sendRequest(msg *Message, tgr interface{}, APIMethod string) error {
 						if t.ErrorCode != 0 {
 							err = errors.TelegramError(t.ErrorCode, t.Description)
 						} else {
-							// distributorTelegram(msg, t)
+							distributorTelegram(msg, t)
 						}
 					case *types.TelegramResponse:
 						if t.ErrorCode != 0 {

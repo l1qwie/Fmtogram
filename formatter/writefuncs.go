@@ -30,8 +30,7 @@ func (ph *photo) WritePhoto(photo string) {
 	if !isItEmply(ph, checkString, ph.Photo) {
 		logs.DataIsntEmply(interfacePhoto, "Photo", ph.Photo)
 	}
-	ph.Photo = photo
-	ph.Media = photo
+	ph.Photo, ph.Media = photo, photo
 	logs.DataWrittenSuccessfully(interfacePhoto, "Photo")
 }
 
@@ -85,6 +84,14 @@ func (ph *photo) WriteGottenFrom(gottenfrom int) {
 
 func (ph *photo) GetResponse() [4]*responseData {
 	return ph.ResponseData
+}
+
+func (vd *video) WriteVideo(video string) {
+	if !isItEmply(vd, checkString, vd.Video) {
+		logs.DataIsntEmply(interfaceVideo, "Video", vd.Video)
+	}
+	vd.Video, vd.Media = video, video
+	logs.DataWrittenSuccessfully(interfaceVideo, "Video")
 }
 
 func (vd *video) WriteThumbnail(thumbnail string) {
@@ -183,6 +190,18 @@ func (vd *video) WriteThumbnailGottenFrom(gottenfrom int) {
 	logs.DataWrittenSuccessfully(interfaceVideo, "Thumbnail Gotten From")
 }
 
+func (vd *video) GetResponse() *types.Video {
+	return vd.ResponseData
+}
+
+func (ad *audio) WriteAudio(audio string) {
+	if !isItEmply(ad, checkString, ad.Audio) {
+		logs.DataIsntEmply(interfaceAudio, "Audio", ad.Audio)
+	}
+	ad.Audio, ad.Media = audio, audio
+	logs.DataWrittenSuccessfully(interfaceAudio, "Audio")
+}
+
 func (ad *audio) WriteThumbnail(thumbnail string) {
 	if !isItEmply(ad, checkString, ad.Thumbnail) {
 		logs.DataIsntEmply("Audio", "Thumbnail", ad.Thumbnail)
@@ -255,6 +274,10 @@ func (ad *audio) WriteThumbnailGottenFrom(gottenfrom int) {
 	logs.DataWrittenSuccessfully(interfaceAudio, "Thumbnail Gotten From")
 }
 
+func (ad *audio) GetResponse() *types.Audio {
+	return ad.ResponseData
+}
+
 func (dc *document) WriteDocument(document string) {
 	if !isItEmply(dc, checkString, dc.Document) {
 		logs.DataIsntEmply("Document", "Document", dc.Document)
@@ -317,6 +340,10 @@ func (dc *document) WriteThumbnailGottenFrom(gottenfrom int) {
 	}
 	dc.ThumbnailGottenFrom = gottenfrom
 	logs.DataWrittenSuccessfully(interfaceDocument, "Thumbnail Gotten From")
+}
+
+func (dc *document) GetResponse() *types.Document {
+	return dc.ResponseData
 }
 
 func (inf *information) WriteString(text string) {
@@ -455,29 +482,30 @@ func (ch *chat) WriteBusinessConnectionID(connectionID string) {
 }
 
 func (in *inline) Set(plan []int) {
-	in.InlineKeyboard = make([][]*inlineKeyboardButton, len(plan))
-	for i := range in.InlineKeyboard {
-		in.InlineKeyboard[i] = make([]*inlineKeyboardButton, plan[i])
+	in.Keyboard = new(inlineKeyboard)
+	in.Keyboard.InlineKeyboard = make([][]*inlineKeyboardButton, len(plan))
+	for i := range in.Keyboard.InlineKeyboard {
+		in.Keyboard.InlineKeyboard[i] = make([]*inlineKeyboardButton, plan[i])
 	}
 }
 
 func (in *inline) NewButton(line, pos int) (IInlineButton, error) {
 	var err error
 
-	if len(in.InlineKeyboard) > line && len(in.InlineKeyboard[line]) > pos {
+	if (line >= 0) && (pos >= 0) && len(in.Keyboard.InlineKeyboard) > line && len(in.Keyboard.InlineKeyboard[line]) > pos {
 
-		if in.InlineKeyboard[line][pos] != nil {
-			logs.DataIsntEmply(inKB, fmt.Sprintf("%s line: %d, position: %d", button, line, pos), in.InlineKeyboard[line][pos])
+		if in.Keyboard.InlineKeyboard[line][pos] != nil {
+			logs.DataIsntEmply(inKB, fmt.Sprintf("%s line: %d, position: %d", button, line, pos), in.Keyboard.InlineKeyboard[line][pos])
 		}
-		in.InlineKeyboard[line][pos] = new(inlineKeyboardButton)
+		in.Keyboard.InlineKeyboard[line][pos] = new(inlineKeyboardButton)
 
-		return in.InlineKeyboard[line][pos], nil
+		return in.Keyboard.InlineKeyboard[line][pos], nil
 
 	} else {
 
-		if len(in.InlineKeyboard) > line {
+		if len(in.Keyboard.InlineKeyboard) > line {
 			err = errors.ButtosDoesntFit("line", line)
-		} else if len(in.InlineKeyboard[line]) > pos {
+		} else if len(in.Keyboard.InlineKeyboard[line]) > pos {
 			err = errors.ButtosDoesntFit("pos", pos)
 		}
 	}
@@ -565,28 +593,29 @@ func (inb *inlineKeyboardButton) WritePay() {
 }
 
 func (rp *reply) Set(plan []int) {
-	rp.Keyboard = make([][]*replyKeyboardButton, len(plan))
-	for i := range rp.Keyboard {
-		rp.Keyboard[i] = make([]*replyKeyboardButton, plan[i])
+	rp.Keyboard = new(replyKeyboard)
+	rp.Keyboard.Keyboard = make([][]*replyKeyboardButton, len(plan))
+	for i := range rp.Keyboard.Keyboard {
+		rp.Keyboard.Keyboard[i] = make([]*replyKeyboardButton, plan[i])
 	}
 }
 
 func (rp *reply) NewButton(line, pos int) (IReplyButton, error) {
 	var err error
 
-	if len(rp.Keyboard) > line && len(rp.Keyboard[line]) > pos {
+	if (line >= 0) && (pos >= 0) && (len(rp.Keyboard.Keyboard) > line) && (len(rp.Keyboard.Keyboard[line]) > pos) {
 
-		if rp.Keyboard[line][pos] != nil {
-			logs.DataIsntEmply(replyKB, fmt.Sprintf("%s line: %d, position: %d", button, line, pos), rp.Keyboard[line][pos])
+		if rp.Keyboard.Keyboard[line][pos] != nil {
+			logs.DataIsntEmply(replyKB, fmt.Sprintf("%s line: %d, position: %d", button, line, pos), rp.Keyboard.Keyboard[line][pos])
 		}
-		rp.Keyboard[line][pos] = new(replyKeyboardButton)
+		rp.Keyboard.Keyboard[line][pos] = new(replyKeyboardButton)
 
-		return rp.Keyboard[line][pos], nil
+		return rp.Keyboard.Keyboard[line][pos], nil
 
 	} else {
-		if len(rp.Keyboard) > line {
+		if len(rp.Keyboard.Keyboard) > line {
 			err = errors.ButtosDoesntFit("line", line)
-		} else if len(rp.Keyboard[line]) > pos {
+		} else if len(rp.Keyboard.Keyboard[line]) > pos {
 			err = errors.ButtosDoesntFit("pos", pos)
 		}
 	}
